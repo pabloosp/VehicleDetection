@@ -6,7 +6,7 @@ import tempfile
 from db import get_connection
 
 class YOLOProcessor:
-    def __init__(self, model_path='yolo11s.pt'): 
+    def __init__(self, model_path='yolo11s.pt'):
         # Cargar el modelo YOLO
         self.model = YOLO(model_path)
         # Lista de nombres de clases que puede detectar el modelo
@@ -29,7 +29,7 @@ class YOLOProcessor:
     def process_frame(self, frame):
         """Procesa un frame para detectar y contar vehículos"""
         # Detectar y rastrear vehículos (solo clases especificadas)
-        results = self.model.track(frame, persist=True, classes=[1, 2, 3, 5, 6, 7])  # 2: coche, 3: moto, 5: autobús, 7: camión
+        results = self.model.track(frame, persist=True, classes=[2, 3, 5, 7])  # 2: coche, 3: moto, 5: autobús, 7: camión
 
         if results[0].boxes is not None and results[0].boxes.id is not None:
             # Obtener coordenadas de las cajas delimitadoras

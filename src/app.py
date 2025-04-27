@@ -4,6 +4,7 @@ import cv2
 import tempfile
 from yolo_processor import YOLOProcessor
 from db import get_connection
+from create_table import create_vehicle_logs_table
 
 try:
     conn = get_connection()
@@ -11,6 +12,9 @@ try:
     conn.close()
 except Exception as e:
     print("❌ Error conectando a MySQL:", e)
+    
+# Crear tabla si no existe
+create_vehicle_logs_table()
     
     
 app = Flask(__name__)
