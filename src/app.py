@@ -11,6 +11,8 @@ try:
     conn.close()
 except Exception as e:
     print("❌ Error conectando a MySQL:", e)
+    
+    
 app = Flask(__name__)
 app.secret_key = 'mi_clave_secreta'  
 
