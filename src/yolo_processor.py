@@ -1,9 +1,10 @@
-from ultralytics import YOLO
 import cv2
+from ultralytics import YOLO
 from flask import Flask, render_template, request, redirect, url_for, flash, session, Response
 import os
 import tempfile
 from db import get_connection
+import datetime
 
 class YOLOProcessor:
     def __init__(self, model_path='yolo11s.pt'):
@@ -25,6 +26,24 @@ class YOLOProcessor:
         self.crossed_ids = set()
         self.vehicle_count = 0
         self.prev_centers = {}
+        
+    def save_vehicle_log(self, vehicle_type):
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
+            timestamp = datetime.datetime.now()  # Obtener la fecha y hora actuales
+            cursor.execute('''
+                INSERT INTO test_logs (timestamp, vehicle_type)
+                VALUES (%s, %s)
+            ''', (timestamp, vehicle_type))
+            conn.commit()
+            print(f"✅ Vehículo ({vehicle_type}) registrado en la base de datos.")
+        except Exception as e:
+            print("❌ Error guardando el log del vehículo:", e)
+        finally:
+            cursor.close()
+            conn.close()
+
 
     def process_frame(self, frame):
         """Procesa un frame para detectar y contar vehículos"""
@@ -48,7 +67,7 @@ class YOLOProcessor:
                 # Dibujar caja delimitadora y centro
                 cv2.circle(frame, (cx, cy), 4, (0, 0, 255), -1) # Punto rojo en el centro
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)  # Caja verde
-                #ID del vehículo
+                # Mostrar ID del vehículo
                 cv2.putText(frame, f"ID: {track_id}", (x1, y1 - 10),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0), 1, cv2.LINE_AA)
                 
@@ -60,6 +79,10 @@ class YOLOProcessor:
                         if track_id not in self.crossed_ids:  # Si no ha sido contado
                             self.crossed_ids.add(track_id)
                             self.vehicle_count += 1
+                            
+                            # Guardar tipo de vehículo
+                            vehicle_type = "Coche" if class_idx == 2 else "Moto" if class_idx == 3 else "Furgoneta" if class_idx == 5 else "Camión"
+                            self.save_vehicle_log(vehicle_type)
                 
                 # Guardar posición actual para el próximo frame
                 self.prev_centers[track_id] = (cx, cy)
