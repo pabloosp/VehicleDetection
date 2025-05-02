@@ -13,12 +13,13 @@ try:
     conn.close()
 except Exception as e:
     print("❌ Error conectando a MySQL:", e)
-    
+
 # Crear tabla si no existe
 #create_vehicle_logs_table()
 create_test_table()  # Cambiado a tabla de prueba
-    
-    
+
+
+
 app = Flask(__name__)
 app.secret_key = 'mi_clave_secreta'  
 
@@ -31,12 +32,33 @@ global_processor = YOLOProcessor(model_path='yolo11s.pt')
 
 @app.route('/')
 def index():
-    # Simula un usuario
-    session['username'] = 'Experto'
-    return redirect(url_for('dashboard'))
+    if 'username' in session:
+        return redirect(url_for('dashboard'))
+    return redirect(url_for('login'))
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        if username == 'expert' and password == 'expert':
+            session['username'] = username
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Credenciales incorrectas.', 'danger')
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    flash('Sesión cerrada.', 'info')
+    return redirect(url_for('login'))
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    
     global video_source, selected_model, global_processor
     if request.method == 'POST':
         video_file = request.files.get('video')
@@ -49,11 +71,12 @@ def dashboard():
             tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
             video_file.save(tmp_file.name)
             video_source = tmp_file.name
-            flash(f"Video cargado. Modelo seleccionado: {selected_model}", "success")
+            flash(f"Video cargado. Modelo seleccionado: {model}", "success")
         else:
             flash("Debes seleccionar un video y un modelo.", "warning")
-    current_user = session.get('username', 'Desconocido')
-    return render_template('dashboard.html', current_user=current_user, selected_model=selected_model)
+    return render_template('expert_dashboard.html', 
+                         current_user=session.get('username', 'Desconocido'),
+                         selected_model=model if request.method == 'POST' else None)
 
 @app.route('/video_feed')
 def video_feed():
