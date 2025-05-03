@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 import os
 import cv2
 import tempfile
+import time
 from yolo_processor import YOLOProcessor
 from db import get_connection
 #from create_table import create_vehicle_logs_table
@@ -21,7 +22,8 @@ create_test_table()  # Cambiado a tabla de prueba
 
 
 app = Flask(__name__)
-app.secret_key = 'mi_clave_secreta'  
+app.secret_key = 'mi_clave_secreta'
+app.config['STARTUP_TOKEN'] = str(time.time())
 
 # De momento se almacenan los vídeos en archivos temp
 video_source = None
@@ -29,6 +31,14 @@ selected_model = None
 
 # Carga global del procesador con modelo por defecto
 global_processor = YOLOProcessor(model_path='yolo11s.pt')
+
+@app.before_request
+def check_valid_session():
+    if 'username' in session:
+        if session.get('startup_token') != app.config['STARTUP_TOKEN']:
+            session.clear()
+            flash('La sesión expiró. Inicia sesión nuevamente.', 'warning')
+            return redirect(url_for('login'))
 
 @app.route('/')
 def index():
@@ -43,6 +53,7 @@ def login():
         password = request.form.get('password')
         if username == 'expert' and password == 'expert':
             session['username'] = username
+            session['startup_token'] = app.config['STARTUP_TOKEN']
             return redirect(url_for('dashboard'))
         else:
             flash('Credenciales incorrectas.', 'danger')
@@ -50,7 +61,7 @@ def login():
 
 @app.route('/logout')
 def logout():
-    session.pop('username', None)
+    session.clear()
     flash('Sesión cerrada.', 'info')
     return redirect(url_for('login'))
 
@@ -71,12 +82,11 @@ def dashboard():
             tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
             video_file.save(tmp_file.name)
             video_source = tmp_file.name
-            flash(f"Video cargado. Modelo seleccionado: {model}", "success")
+            flash(f"Video cargado. Modelo seleccionado: {selected_model}", "success")
         else:
             flash("Debes seleccionar un video y un modelo.", "warning")
-    return render_template('expert_dashboard.html', 
-                         current_user=session.get('username', 'Desconocido'),
-                         selected_model=model if request.method == 'POST' else None)
+    current_user = session.get('username', 'Desconocido')
+    return render_template('expert_dashboard.html', current_user=current_user, selected_model=selected_model)
 
 @app.route('/video_feed')
 def video_feed():
