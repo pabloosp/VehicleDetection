@@ -43,7 +43,7 @@ def check_valid_session():
 @app.route('/')
 def index():
     if 'username' in session:
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('expert_dashboard'))
     return redirect(url_for('login'))
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -53,8 +53,16 @@ def login():
         password = request.form.get('password')
         if username == 'expert' and password == 'expert':
             session['username'] = username
+            session['role'] = 'expert'
             session['startup_token'] = app.config['STARTUP_TOKEN']
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('expert_dashboard'))
+        
+        elif username == 'user' and password == 'user':  # Nuevo usuario básico
+            session['username'] = username
+            session['role'] = 'user'
+            session['startup_token'] = app.config['STARTUP_TOKEN']
+            return redirect(url_for('user_dashboard'))  # Nueva ruta
+        
         else:
             flash('Credenciales incorrectas.', 'danger')
     return render_template('login.html')
@@ -65,8 +73,14 @@ def logout():
     flash('Sesión cerrada.', 'info')
     return redirect(url_for('login'))
 
-@app.route('/dashboard', methods=['GET', 'POST'])
-def dashboard():
+@app.route('/user_dashboard')
+def user_dashboard():
+    if 'username' not in session or session.get('role') != 'user':
+        return redirect(url_for('login'))
+    return render_template('user_dashboard.html')
+
+@app.route('/expert_dashboard', methods=['GET', 'POST'])
+def expert_dashboard():
     if 'username' not in session:
         return redirect(url_for('login'))
     
