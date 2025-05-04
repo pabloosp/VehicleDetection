@@ -53,7 +53,7 @@
       <a class="navbar-brand" href="#">Vehicle Detection</a>
       <div class="d-flex align-items-center">
         <span class="text-white me-2">Usuario: {{ current_user }}</span>
-        <a class="btn btn-outline-light" href="#">Cambiar Usuario</a>
+        <a class="btn btn-outline-light" href="{{ url_for('logout') }}">Cerrar sesión</a>
       </div>
     </div>
   </nav>
