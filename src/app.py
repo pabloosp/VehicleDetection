@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, Response
+from flask import Flask, render_template, request, redirect, url_for, flash, session, Response, make_response
 import os
 import cv2
 import tempfile
@@ -7,6 +7,8 @@ from yolo_processor import YOLOProcessor
 from db import get_connection
 #from create_table import create_vehicle_logs_table
 from create_table import create_test_table  # Cambiamos a la función para crear la tabla de prueba
+import io
+import csv
 
 try:
     conn = get_connection()
@@ -134,14 +136,13 @@ def expert_dashboard():
     if 'username' not in session:
         return redirect(url_for('login'))
     
-    global video_source, selected_model, global_processor
+    global video_source, global_processor
     if request.method == 'POST':
         video_file = request.files.get('video')
         model = request.form.get('model_type')  
         if video_file and model:
-            selected_model = model
             # Reinstanciar el procesador con el modelo seleccionado
-            global_processor = YOLOProcessor(model_path=selected_model)
+            global_processor = YOLOProcessor(model_path=model)
             # Crear un archivo temporal para guardar el video durante el procesamiento
             tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
             video_file.save(tmp_file.name)
@@ -149,8 +150,59 @@ def expert_dashboard():
             flash(f"Video cargado. Modelo seleccionado: {selected_model}", "success")
         else:
             flash("Debes seleccionar un video y un modelo.", "warning")
-    current_user = session.get('username', 'Desconocido')
-    return render_template('expert_dashboard.html', current_user=current_user, selected_model=selected_model)
+    return render_template('expert_dashboard.html', current_user=session.get('username', 'Desconocido'))
+
+@app.route('/export_csv/<start_date>/<end_date>')
+def export_csv(start_date, end_date):
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    
+    try:
+        # Añadir horas para completar los dias
+        start_full = f"{start_date} 00:00:00"
+        end_full = f"{end_date} 23:59:59"
+        
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        cursor.execute('''
+            SELECT timestamp, vehicle_type, model_used 
+            FROM test_vehicle_logs
+            WHERE timestamp BETWEEN %s AND %s
+            ORDER BY timestamp DESC
+        ''', (start_full, end_full))
+        
+        records = cursor.fetchall()
+        
+        # Generar CSV
+        import io
+        import csv
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
+        # Cabeceras
+        writer.writerow(['Fecha y Hora', 'Tipo de Vehículo', 'Modelo Utilizado'])
+        
+        # Datos
+        for record in records:
+            writer.writerow([
+                record['timestamp'].strftime('%Y-%m-%d %H:%M:%S'),
+                record['vehicle_type'],
+                record['model_used']
+            ])
+        
+        # Crear respuesta
+        from flask import make_response
+        response = make_response(output.getvalue())
+        filename = f"reporte_{start_date}_a_{end_date}.csv"
+        response.headers['Content-Disposition'] = f'attachment; filename={filename}'
+        response.headers['Content-type'] = 'text/csv'
+        
+        return response
+        
+    except Exception as e:
+        flash(f'Error al generar CSV: {str(e)}', 'danger')
+        return redirect(url_for('user_dashboard'))
 
 @app.route('/video_feed')
 def video_feed():
