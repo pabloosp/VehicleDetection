@@ -51,6 +51,7 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+        
         if username == 'expert' and password == 'expert':
             session['username'] = username
             session['role'] = 'expert'
@@ -73,11 +74,60 @@ def logout():
     flash('Sesión cerrada.', 'info')
     return redirect(url_for('login'))
 
-@app.route('/user_dashboard')
+@app.route('/user_dashboard', methods=['GET', 'POST'])
 def user_dashboard():
     if 'username' not in session or session.get('role') != 'user':
         return redirect(url_for('login'))
-    return render_template('user_dashboard.html')
+    
+    report_data = None
+    start_date = end_date = None
+
+    if request.method == 'POST':
+        start_date = request.form.get('start_date')
+        end_date = request.form.get('end_date')
+        
+        try:
+            
+            # Añadir horas para completar los dias
+            start_full_time = f"{start_date} 00:00:00"
+            end_full_time = f"{end_date} 23:59:59"
+            
+            conn = get_connection()
+            cursor = conn.cursor(dictionary=True)
+
+            
+            # Consulta total 
+            cursor.execute('''
+                SELECT COUNT(*) as total FROM test_logs
+                WHERE timestamp BETWEEN %s AND %s
+            ''', (start_full_time, end_full_time))
+            total = cursor.fetchone()['total']
+
+            # Consulta por tipo de vehículo
+            cursor.execute('''
+                SELECT 
+                    vehicle_type as type,
+                    COUNT(*) as count
+                FROM test_logs
+                WHERE timestamp BETWEEN %s AND %s
+                GROUP BY vehicle_type
+            ''', (start_full_time, end_full_time))
+            types = cursor.fetchall()
+
+            report_data = {
+                'total': total,
+                'types': types  
+            }
+
+        except Exception as e:
+            flash(f'Error al generar reporte: {str(e)}', 'danger')
+            
+    return render_template(
+        'user_dashboard.html',
+        report_data=report_data,
+        start_date=start_date,
+        end_date=end_date
+    )
 
 @app.route('/expert_dashboard', methods=['GET', 'POST'])
 def expert_dashboard():
