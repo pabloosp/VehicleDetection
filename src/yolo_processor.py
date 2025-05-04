@@ -10,6 +10,8 @@ class YOLOProcessor:
     def __init__(self, model_path='yolo11s.pt'):
         # Cargar el modelo YOLO
         self.model = YOLO(model_path)
+        # Guardar el nombre del modelo y quitar pt
+        self.model_name = os.path.basename(model_path).replace('.pt', '')
         # Lista de nombres de clases que puede detectar el modelo
         self.class_list = self.model.names
         # Conjunto para almacenar IDs de vehículos que ya cruzaron
@@ -33,11 +35,11 @@ class YOLOProcessor:
             cursor = conn.cursor()
             timestamp = datetime.datetime.now()  # Obtener la fecha y hora actuales
             cursor.execute('''
-                INSERT INTO test_logs (timestamp, vehicle_type)
+                INSERT INTO test_logs (timestamp, vehicle_type, model_used)
                 VALUES (%s, %s)
-            ''', (timestamp, vehicle_type))
+            ''', (timestamp, vehicle_type, self.model_name))
             conn.commit()
-            print(f"✅ Vehículo ({vehicle_type}) registrado en la base de datos.")
+            print(f"✅ Vehículo ({vehicle_type}) registrado con modelo {self.model_name}")
         except Exception as e:
             print("❌ Error guardando el log del vehículo:", e)
         finally:
