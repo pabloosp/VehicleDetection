@@ -37,6 +37,7 @@ def create_test_table():
             cursor.execute('''
                 ALTER TABLE test_logs 
                 ADD COLUMN model_used VARCHAR(20) NOT NULL AFTER vehicle_type
+                ADD COLUMN facultad VARCHAR(100) DEFAULT 'Sin especificar' AFTER model_used
             ''')
         conn.commit()
         print("✅ Tabla de prueba 'test_logs' creada.")
