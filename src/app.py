@@ -182,7 +182,7 @@ def export_csv(start_date, end_date):
         
         cursor.execute('''
             SELECT timestamp, vehicle_type, model_used 
-            FROM test_vehicle_logs
+            FROM test_logs
             WHERE timestamp BETWEEN %s AND %s
             ORDER BY timestamp DESC
         ''', (start_full, end_full))

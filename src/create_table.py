@@ -30,6 +30,14 @@ def create_test_table():
                 vehicle_type VARCHAR(50) NOT NULL
             );
         ''')
+        #Añadir columna a tabla prueba
+        cursor.execute("SHOW COLUMNS FROM test_logs LIKE 'model_used'")
+        if not cursor.fetchone():  # Si la columna no existe
+            print("⚠️ Columna 'model_used' no existe. Añadiéndola...")
+            cursor.execute('''
+                ALTER TABLE test_logs 
+                ADD COLUMN model_used VARCHAR(20) NOT NULL AFTER vehicle_type
+            ''')
         conn.commit()
         print("✅ Tabla de prueba 'test_logs' creada.")
     except Exception as e:
