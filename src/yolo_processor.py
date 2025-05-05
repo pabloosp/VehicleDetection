@@ -41,9 +41,9 @@ class YOLOProcessor:
             cursor = conn.cursor()
             timestamp = datetime.datetime.now()  # Obtener la fecha y hora actuales
             cursor.execute('''
-                INSERT INTO test_logs (timestamp, vehicle_type, model_used)
-                VALUES (%s, %s, %s)
-            ''', (timestamp, vehicle_type, self.model_name))
+                INSERT INTO test_logs (timestamp, vehicle_type, model_used, facultad)
+                VALUES (%s, %s, %s, %s)
+            ''', (timestamp, vehicle_type, self.model_name, "Desconocida"))
             conn.commit()
             print(f"✅ Vehículo ({vehicle_type}) registrado con modelo {self.model_name}")
         except Exception as e:
