@@ -10,6 +10,7 @@ from create_table import create_test_table  # Cambiamos a la función para crear
 import io
 import csv
 import torch
+ALLOWED_EXTENSIONS = {'.mov', '.mp4', '.avi'}
 
 try:
     conn = get_connection()
@@ -142,29 +143,37 @@ def expert_dashboard():
         video_file = request.files.get('video')
         model = request.form.get('model_type')  
         use_cuda = request.form.get('use_cuda') == 'on' and torch.cuda.is_available()
-        if video_file and model:
-            selected_model=model
-            try:
-                global_processor = YOLOProcessor(
-                    model_path=model,
-                    use_cuda=use_cuda  # Nuevo parámetro
-                )
-                # Crear un archivo temporal para guardar el video durante el procesamiento
-                tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
-                video_file.save(tmp_file.name)
-                video_source = tmp_file.name
+        
+        if not video_file or video_file.filename == '':
+            flash("No se ha seleccionado ningún archivo de video", "danger")
+            return redirect(url_for('expert_dashboard'))
+            
+        if not model:
+            flash("Debes seleccionar un modelo YOLO", "danger")
+            return redirect(url_for('expert_dashboard'))
+        try:
+            file_ext = os.path.splitext(video_file.filename)[1].lower() #Extraer extensión
+            tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix='file_ext')
+            video_file.save(tmp_file.name)
+            video_source = tmp_file.name
+            
+            global_processor = YOLOProcessor(
+                model_path=model,
+                use_cuda=use_cuda  
+            )
+            
+            selected_model = model
+            
+            device_status = "GPU" if use_cuda else "CPU"
+            flash(
+                f"Video {file_ext} cargado | Modelo: {os.path.basename(model)} | "
+                f"Dispositivo: {device_status}",
+                "success"
+            )
                 
-                device_status = "GPU" if use_cuda else "CPU"
-                flash(
-                    f"Video cargado | Modelo: {os.path.basename(model)} | "
-                    f"Dispositivo: {device_status}",
-                    "success"
-                )
-                
-            except Exception as e:
+        except Exception as e:
                 flash(f"Error al inicializar el modelo: {str(e)}", "danger")
-        else:
-            flash("Debes seleccionar un video y un modelo.", "warning")
+
     return render_template('expert_dashboard.html', current_user=session.get('username', 'Desconocido'),selected_model=selected_model, cuda_available=torch.cuda.is_available())
 
 @app.route('/export_csv/<start_date>/<end_date>')
@@ -244,6 +253,9 @@ def gen_frames():
     # Al terminar, elimina el archivo temporal para no guardar videos
     if os.path.exists(video_source):
         os.remove(video_source)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
