@@ -83,6 +83,18 @@
                 <option value="yolo11l.pt">YOLO11 Large</option>
               </select>
             </div>
+            
+            <div class="mb-3 form-check form-switch">
+              <input class="form-check-input" type="checkbox" name="use_cuda" id="use_cuda" 
+                    {% if cuda_available %}checked{% else %}disabled{% endif %}>
+              <label class="form-check-label" for="use_cuda">
+                <i class="bi bi-gpu-card"></i> Usar GPU 
+                {% if not cuda_available %}
+                  <span class="text-muted small">(No disponible)</span>
+                {% endif %}
+              </label>
+            </div>
+            
             <div class="mb-3">
               <label for="video" class="form-label">Seleccionar Video</label>
               <input type="file" class="form-control" name="video" id="video" accept="video/*" required>

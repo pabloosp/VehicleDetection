@@ -5,11 +5,15 @@ import os
 import tempfile
 from db import get_connection
 import datetime
+from ultralytics import YOLO
+import torch
 
 class YOLOProcessor:
-    def __init__(self, model_path='yolo11s.pt'):
+    def __init__(self, model_path='yolo11s.pt', use_cuda=False):
+        #Configurar Cuda
+        self.device = 'cuda' if (use_cuda and torch.cuda.is_available()) else 'cpu'
         # Cargar el modelo YOLO
-        self.model = YOLO(model_path)
+        self.model = YOLO(model_path).to(self.device)
         # Guardar el nombre del modelo y quitar pt
         self.model_name = os.path.basename(model_path).replace('.pt', '')
         # Lista de nombres de clases que puede detectar el modelo
@@ -22,6 +26,8 @@ class YOLOProcessor:
         self.line_y = 150
         # Diccionario para guardar posiciones anteriores de vehículos
         self.prev_centers = {}
+        
+        print(f"Modelo cargado en: {self.device.upper()}")
 
     def reset_counter(self):
         """Reinicia todos los contadores y registros"""
@@ -46,11 +52,10 @@ class YOLOProcessor:
             cursor.close()
             conn.close()
 
-
     def process_frame(self, frame):
         """Procesa un frame para detectar y contar vehículos"""
         # Detectar y rastrear vehículos (solo clases especificadas)
-        results = self.model.track(frame, persist=True, classes=[2, 3, 5, 7])  # 2: coche, 3: moto, 5: autobús, 7: camión
+        results = self.model.track(frame, persist=True, classes=[2, 3, 5, 7], device=self.device)  # 2: coche, 3: moto, 5: autobús, 7: camión
 
         if results[0].boxes is not None and results[0].boxes.id is not None:
             # Obtener coordenadas de las cajas delimitadoras

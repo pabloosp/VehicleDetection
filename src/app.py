@@ -9,6 +9,7 @@ from db import get_connection
 from create_table import create_test_table  # Cambiamos a la función para crear la tabla de prueba
 import io
 import csv
+import torch
 
 try:
     conn = get_connection()
@@ -136,21 +137,35 @@ def expert_dashboard():
     if 'username' not in session:
         return redirect(url_for('login'))
     
-    global video_source, global_processor
+    global video_source, global_processor, selected_model
     if request.method == 'POST':
         video_file = request.files.get('video')
         model = request.form.get('model_type')  
+        use_cuda = request.form.get('use_cuda') == 'on' and torch.cuda.is_available()
         if video_file and model:
-            # Reinstanciar el procesador con el modelo seleccionado
-            global_processor = YOLOProcessor(model_path=model)
-            # Crear un archivo temporal para guardar el video durante el procesamiento
-            tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
-            video_file.save(tmp_file.name)
-            video_source = tmp_file.name
-            flash(f"Video cargado. Modelo seleccionado: {selected_model}", "success")
+            selected_model=model
+            try:
+                global_processor = YOLOProcessor(
+                    model_path=model,
+                    use_cuda=use_cuda  # Nuevo parámetro
+                )
+                # Crear un archivo temporal para guardar el video durante el procesamiento
+                tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
+                video_file.save(tmp_file.name)
+                video_source = tmp_file.name
+                
+                device_status = "GPU" if use_cuda else "CPU"
+                flash(
+                    f"Video cargado | Modelo: {os.path.basename(model)} | "
+                    f"Dispositivo: {device_status}",
+                    "success"
+                )
+                
+            except Exception as e:
+                flash(f"Error al inicializar el modelo: {str(e)}", "danger")
         else:
             flash("Debes seleccionar un video y un modelo.", "warning")
-    return render_template('expert_dashboard.html', current_user=session.get('username', 'Desconocido'))
+    return render_template('expert_dashboard.html', current_user=session.get('username', 'Desconocido'),selected_model=selected_model, cuda_available=torch.cuda.is_available())
 
 @app.route('/export_csv/<start_date>/<end_date>')
 def export_csv(start_date, end_date):
