@@ -117,10 +117,11 @@
                   </div>
                 </div>
               </div>
-            {% else %}
+            {% elif show_faculty_form %}
               <div class="mt-3 p-3 border rounded bg-warning bg-opacity-10">
                 <h6 class="mb-3">⚠️ No se detectaron coordenadas</h6>
                 <form method="POST">
+                  <input type="hidden" name="is_faculty_form" value="true">   <!--"Bypassear"el form-->
                   <select name="facultad" class="form-select mb-3" required>
                     <option value="" disabled selected>-- Seleccione facultad --</option>
                     <option value="EPS Vena">EPS Vena</option>

@@ -145,59 +145,87 @@ def expert_dashboard():
     show_faculty_form = False
     selected_faculty = None
     gps_status = None
+    video_ready = False
     
     if request.method == 'POST':
         
+        #Form de selección de facultad
         if 'facultad' in request.form:
             selected_faculty = request.form['facultad']
             flash(f"Facultad asignada: {selected_faculty}", "success")
             
-        video_file = request.files.get('video')
-        model = request.form.get('model_type')  
-        use_cuda = request.form.get('use_cuda') == 'on' and torch.cuda.is_available()
+        # Recuperamos los datos temporales
+            if 'tmp_video_path' in session:
+                if os.path.exists(session['tmp_video_path']):
+                    video_source = session['tmp_video_path']
+                    selected_model = session['pending_model']
+                    global_processor = YOLOProcessor(
+                        model_path=selected_model,
+                        use_cuda=session['pending_use_cuda']
+                    )
+                    video_ready = True
+                    
+                    # Limpiar 
+                    session.pop('tmp_video_path')
+                    session.pop('pending_model')
+                    session.pop('pending_use_cuda')
+                else:
+                    flash("El archivo de video temporal ha expirado, por favor súbelo nuevamente", "danger")
+            return redirect(url_for('expert_dashboard'))
         
-        if not video_file or video_file.filename == '':
+        #Form principal
+        video_file = request.files.get('video')
+        if video_file and video_file.filename != '':
+            model = request.form.get('model_type')  
+            use_cuda = request.form.get('use_cuda') == 'on' and torch.cuda.is_available()
+        
+            if not model:
+                flash("Debes seleccionar un modelo YOLO", "danger")
+                return redirect(url_for('expert_dashboard'))
+            
+            try:
+                file_ext = os.path.splitext(video_file.filename)[1].lower() #Extraer extensión
+                tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix='file_ext')
+                video_file.save(tmp_file.name)
+            
+            
+                gps_coords = get_gps_from_video(tmp_file.name)
+                show_gps = True  #Activar visualización de coords/aviso
+                
+                
+                if gps_coords:
+                    gps_status = "success"
+                    flash("Coordenadas GPS detectadas correctamente", "success")
+                    video_source = tmp_file.name
+                    selected_model = model
+                    global_processor = YOLOProcessor(
+                        model_path=model,
+                        use_cuda=use_cuda
+                    )
+                    video_ready = True
+                else:
+                    gps_status = "warning"
+                    flash("Coordenadas no detectadas. Por favor seleccione la facultad manualmente", "warning")
+                    show_faculty_form = True
+                    session['tmp_video_path'] = tmp_file.name
+                    session['pending_model'] = model
+                    session['pending_use_cuda'] = use_cuda
+                
+                device_status = "GPU" if use_cuda else "CPU"
+                flash(
+                    f"Video {file_ext} cargado | Modelo: {os.path.basename(model)} | "
+                    f"Dispositivo: {device_status}",
+                    "success"
+                )
+                
+            except Exception as e:
+                    flash(f"Error al inicializar el modelo: {str(e)}", "danger")
+        
+        elif 'facultad' not in request.form:
             flash("No se ha seleccionado ningún archivo de video", "danger")
             return redirect(url_for('expert_dashboard'))
-            
-        if not model:
-            flash("Debes seleccionar un modelo YOLO", "danger")
-            return redirect(url_for('expert_dashboard'))
-        try:
-            file_ext = os.path.splitext(video_file.filename)[1].lower() #Extraer extensión
-            tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix='file_ext')
-            video_file.save(tmp_file.name)
-            video_source = tmp_file.name
-            
-            gps_coords = get_gps_from_video(tmp_file.name)
-            show_gps = True  #Activar visualización de coords/aviso
-            
-            if gps_coords:
-                gps_status = "success"
-                flash("Coordenadas GPS detectadas correctamente", "success")
-            else:
-                gps_status = "warning"
-                flash("Coordenadas no detectadas. Por favor seleccione la facultad manualmente", "warning")
-                show_faculty_form = True
-            
-            global_processor = YOLOProcessor(
-                model_path=model,
-                use_cuda=use_cuda  
-            )
-            
-            selected_model = model
-            
-            device_status = "GPU" if use_cuda else "CPU"
-            flash(
-                f"Video {file_ext} cargado | Modelo: {os.path.basename(model)} | "
-                f"Dispositivo: {device_status}",
-                "success"
-            )
-                
-        except Exception as e:
-                flash(f"Error al inicializar el modelo: {str(e)}", "danger")
 
-    return render_template('expert_dashboard.html', current_user=session.get('username', 'Desconocido'),selected_model=selected_model, cuda_available=torch.cuda.is_available(),gps_coords=gps_coords, show_gps=show_gps, show_faculty_form=show_faculty_form, selected_faculty=selected_faculty, gps_status=gps_status)
+    return render_template('expert_dashboard.html', current_user=session.get('username', 'Desconocido'),selected_model=selected_model, cuda_available=torch.cuda.is_available(),gps_coords=gps_coords, show_gps=show_gps, show_faculty_form=show_faculty_form, selected_faculty=selected_faculty, gps_status=gps_status, video_ready=video_ready)
 
 @app.route('/export_csv/<start_date>/<end_date>')
 def export_csv(start_date, end_date):
