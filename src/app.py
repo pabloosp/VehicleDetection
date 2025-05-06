@@ -126,7 +126,7 @@ def user_dashboard():
 
         except Exception as e:
             flash(f'Error al generar reporte: {str(e)}', 'danger')
-            
+        
     return render_template(
         'user_dashboard.html',
         report_data=report_data,
@@ -142,8 +142,16 @@ def expert_dashboard():
     global video_source, global_processor, selected_model
     gps_coords = None
     show_gps= False
+    show_faculty_form = False
+    selected_faculty = None
+    gps_status = None
     
     if request.method == 'POST':
+        
+        if 'facultad' in request.form:
+            selected_faculty = request.form['facultad']
+            flash(f"Facultad asignada: {selected_faculty}", "success")
+            
         video_file = request.files.get('video')
         model = request.form.get('model_type')  
         use_cuda = request.form.get('use_cuda') == 'on' and torch.cuda.is_available()
@@ -164,6 +172,14 @@ def expert_dashboard():
             gps_coords = get_gps_from_video(tmp_file.name)
             show_gps = True  #Activar visualización de coords/aviso
             
+            if gps_coords:
+                gps_status = "success"
+                flash("Coordenadas GPS detectadas correctamente", "success")
+            else:
+                gps_status = "warning"
+                flash("Coordenadas no detectadas. Por favor seleccione la facultad manualmente", "warning")
+                show_faculty_form = True
+            
             global_processor = YOLOProcessor(
                 model_path=model,
                 use_cuda=use_cuda  
@@ -181,7 +197,7 @@ def expert_dashboard():
         except Exception as e:
                 flash(f"Error al inicializar el modelo: {str(e)}", "danger")
 
-    return render_template('expert_dashboard.html', current_user=session.get('username', 'Desconocido'),selected_model=selected_model, cuda_available=torch.cuda.is_available(),gps_coords=gps_coords, show_gps=show_gps)
+    return render_template('expert_dashboard.html', current_user=session.get('username', 'Desconocido'),selected_model=selected_model, cuda_available=torch.cuda.is_available(),gps_coords=gps_coords, show_gps=show_gps, show_faculty_form=show_faculty_form, selected_faculty=selected_faculty, gps_status=gps_status)
 
 @app.route('/export_csv/<start_date>/<end_date>')
 def export_csv(start_date, end_date):
