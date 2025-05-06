@@ -141,6 +141,7 @@ def expert_dashboard():
     
     global video_source, global_processor, selected_model
     gps_coords = None
+    show_gps= False
     
     if request.method == 'POST':
         video_file = request.files.get('video')
@@ -161,6 +162,7 @@ def expert_dashboard():
             video_source = tmp_file.name
             
             gps_coords = get_gps_from_video(tmp_file.name)
+            show_gps = True  #Activar visualización de coords/aviso
             
             global_processor = YOLOProcessor(
                 model_path=model,
@@ -179,7 +181,7 @@ def expert_dashboard():
         except Exception as e:
                 flash(f"Error al inicializar el modelo: {str(e)}", "danger")
 
-    return render_template('expert_dashboard.html', current_user=session.get('username', 'Desconocido'),selected_model=selected_model, cuda_available=torch.cuda.is_available(),gps_coords=gps_coords)
+    return render_template('expert_dashboard.html', current_user=session.get('username', 'Desconocido'),selected_model=selected_model, cuda_available=torch.cuda.is_available(),gps_coords=gps_coords, show_gps=show_gps)
 
 @app.route('/export_csv/<start_date>/<end_date>')
 def export_csv(start_date, end_date):
