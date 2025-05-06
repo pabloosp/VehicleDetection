@@ -7,6 +7,7 @@ from yolo_processor import YOLOProcessor
 from db import get_connection
 #from create_table import create_vehicle_logs_table
 from create_table import create_test_table  # Cambiamos a la función para crear la tabla de prueba
+from video_metadata import get_gps_from_video
 import io
 import csv
 import torch
@@ -139,6 +140,8 @@ def expert_dashboard():
         return redirect(url_for('login'))
     
     global video_source, global_processor, selected_model
+    gps_coords = None
+    
     if request.method == 'POST':
         video_file = request.files.get('video')
         model = request.form.get('model_type')  
@@ -157,6 +160,8 @@ def expert_dashboard():
             video_file.save(tmp_file.name)
             video_source = tmp_file.name
             
+            gps_coords = get_gps_from_video(tmp_file.name)
+            
             global_processor = YOLOProcessor(
                 model_path=model,
                 use_cuda=use_cuda  
@@ -174,7 +179,7 @@ def expert_dashboard():
         except Exception as e:
                 flash(f"Error al inicializar el modelo: {str(e)}", "danger")
 
-    return render_template('expert_dashboard.html', current_user=session.get('username', 'Desconocido'),selected_model=selected_model, cuda_available=torch.cuda.is_available())
+    return render_template('expert_dashboard.html', current_user=session.get('username', 'Desconocido'),selected_model=selected_model, cuda_available=torch.cuda.is_available(),gps_coords=gps_coords)
 
 @app.route('/export_csv/<start_date>/<end_date>')
 def export_csv(start_date, end_date):

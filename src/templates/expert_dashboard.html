@@ -101,8 +101,31 @@
             </div>
             <button type="submit" class="btn btn-primary w-100">Subir Video</button>
           </form>
-        </div>
-      </div>
+
+          <!-- Mostrar coordenadas GPS -->
+          {% if gps_coords %}
+          <div class="card mt-3">
+              <div class="card-header bg-primary text-white">
+                  <i class="bi bi-geo-alt"></i> Metadatos de Ubicación
+              </div>
+              <div class="card-body">
+                  <p class="mb-1"><strong>Latitud:</strong> {{ gps_coords['lat'] }}</p>
+                  <p class="mb-1"><strong>Longitud:</strong> {{ gps_coords['lon'] }}</p>
+                  <small class="text-muted">Estas coordenadas corresponden al lugar de grabación.</small>
+              </div>
+          </div>
+          {% else %}
+          <div class="card mt-3 border-warning">
+              <div class="card-header bg-warning text-dark">
+                  <i class="bi bi-exclamation-triangle"></i> Sin datos de ubicación
+              </div>
+              <div class="card-body">
+                  <p class="mb-0">El video no contiene metadatos GPS o no se pudieron leer.</p>
+              </div>
+          </div>
+          {% endif %}
+                  </div>
+                </div>
 
       <!-- Columna derecha: Recuadro para mostrar el video procesado -->
       <div class="col-md-8">
