@@ -183,6 +183,15 @@ def expert_dashboard():
                 flash("Debes seleccionar un modelo YOLO", "danger")
                 return redirect(url_for('expert_dashboard'))
             
+            if video_source and os.path.exists(video_source):
+                os.remove(video_source)
+            video_source = None
+            selected_model = None
+            global_processor.reset_counter()
+            session.pop('tmp_video_path', None)
+            session.pop('pending_model', None)
+            session.pop('pending_use_cuda', None)
+            
             try:
                 file_ext = os.path.splitext(video_file.filename)[1].lower() #Extraer extensión
                 tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix='file_ext')
@@ -289,6 +298,8 @@ def gen_frames():
     if video_source is None:
         return  # Si no hay video, no se transmite nada.
     cap = cv2.VideoCapture(video_source)
+    video_path = video_source  # Guardar ruta antes de borrar referencia global
+    video_source = None  
     while cap.isOpened():
         success, frame = cap.read()
         if not success:
@@ -302,8 +313,11 @@ def gen_frames():
                b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
     cap.release()
     # Al terminar, elimina el archivo temporal para no guardar videos
-    if os.path.exists(video_source):
-        os.remove(video_source)
+    if video_path and os.path.exists(video_path):
+        try:
+            os.remove(video_path)
+        except PermissionError:
+            print(f"No se pudo borrar el archivo {video_path} porque está en uso.")
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
