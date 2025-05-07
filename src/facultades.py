@@ -1,6 +1,8 @@
+from shapely.geometry import Point, Polygon
+
 # Diccionario con nombre de facultad y sus coordenadas, OBTENER CON GEOSJON FIgura polígono
 FACULTADES = {
-    "Derecho": Polygon([
+    "Facultad Derecho": Polygon([
         (-3.7277690021020646, 42.3410275871681),
         (-3.728156951293414, 42.340182220954404),
         (-3.7270434867314464, 42.33986939533375),
@@ -13,7 +15,8 @@ FACULTADES = {
         (-3.717415779462499, 42.33895965907911),
         (-3.718325895684842, 42.34034083148893),
         (-3.721185110365866, 42.33925137474452),
-    ]),"Facultad Ciencias": Polygon([
+    ]),
+    "Facultad Ciencias": Polygon([
         (-3.7276166893943525, 42.343540989758594),
         (-3.728578331097367, 42.34214326270228),
         (-3.7260963284879267, 42.34188912717141),
@@ -26,7 +29,8 @@ FACULTADES = {
         (-3.7304765334802994, 42.34055607526963),
         (-3.7293790826034297, 42.34205442606077),
         (-3.7312244777085652, 42.342168092594676),
-    ]),"Facultad Económicas": Polygon([
+    ]),
+    "Facultad Económicas": Polygon([
         (-3.7269513272341044, 42.339658274711184),
         (-3.7273312329662645, 42.339010241254755),
         (-3.725273897310359, 42.3385393327529),
@@ -52,3 +56,10 @@ FACULTADES = {
         (-3.689793235355637, 42.351628114392184),
     ])
 }
+
+def facultad_por_coordenadas(lat, lon):
+    punto = Point(lon, lat)  # shapely usa (lon, lat), acordarse de esto
+    for nombre, poligono in FACULTADES.items():
+        if poligono.contains(punto):
+            return nombre
+    return None
