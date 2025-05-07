@@ -152,16 +152,17 @@ def expert_dashboard():
         #Form de selección de facultad
         if 'facultad' in request.form:
             selected_faculty = request.form['facultad']
+            session['selected_faculty'] = selected_faculty
             flash(f"Facultad asignada: {selected_faculty}", "success")
             
         # Recuperamos los datos temporales
-            if 'tmp_video_path' in session:
-                if os.path.exists(session['tmp_video_path']):
+            if 'tmp_video_path' in session and os.path.exists(session['tmp_video_path']):
                     video_source = session['tmp_video_path']
                     selected_model = session['pending_model']
                     global_processor = YOLOProcessor(
                         model_path=selected_model,
-                        use_cuda=session['pending_use_cuda']
+                        use_cuda=session['pending_use_cuda'],
+                        default_location=selected_faculty
                     )
                     video_ready = True
                     
@@ -169,8 +170,7 @@ def expert_dashboard():
                     session.pop('tmp_video_path')
                     session.pop('pending_model')
                     session.pop('pending_use_cuda')
-                else:
-                    flash("El archivo de video temporal ha expirado, por favor súbelo nuevamente", "danger")
+
             return redirect(url_for('expert_dashboard'))
         
         #Form principal
@@ -187,7 +187,8 @@ def expert_dashboard():
                 os.remove(video_source)
             video_source = None
             selected_model = None
-            global_processor.reset_counter()
+            if global_processor:
+                global_processor.reset_counter()
             session.pop('tmp_video_path', None)
             session.pop('pending_model', None)
             session.pop('pending_use_cuda', None)
@@ -204,12 +205,15 @@ def expert_dashboard():
                 
                 if gps_coords:
                     gps_status = "success"
+                    location = f"Lat: {gps_coords['lat']:.6f}, Lon: {gps_coords['lon']:.6f}"
+                    session['gps_coords'] = location  
                     flash("Coordenadas GPS detectadas correctamente", "success")
                     video_source = tmp_file.name
                     selected_model = model
                     global_processor = YOLOProcessor(
                         model_path=model,
-                        use_cuda=use_cuda
+                        use_cuda=use_cuda,
+                        default_location=location
                     )
                     video_ready = True
                 else:

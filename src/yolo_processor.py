@@ -9,7 +9,7 @@ from ultralytics import YOLO
 import torch
 
 class YOLOProcessor:
-    def __init__(self, model_path='yolo11s.pt', use_cuda=False):
+    def __init__(self, model_path='yolo11s.pt', use_cuda=False, default_location="Desconocida"):
         #Configurar Cuda
         self.device = 'cuda' if (use_cuda and torch.cuda.is_available()) else 'cpu'
         # Cargar el modelo YOLO
@@ -26,6 +26,8 @@ class YOLOProcessor:
         self.line_y = 150
         # Diccionario para guardar posiciones anteriores de vehículos
         self.prev_centers = {}
+        # Ubi
+        self.current_location = default_location  # Nuevo atributo
         
         print(f"Modelo cargado en: {self.device.upper()}")
 
@@ -43,9 +45,9 @@ class YOLOProcessor:
             cursor.execute('''
                 INSERT INTO test_logs (timestamp, vehicle_type, model_used, facultad)
                 VALUES (%s, %s, %s, %s)
-            ''', (timestamp, vehicle_type, self.model_name, "Desconocida"))
+            ''', (timestamp, vehicle_type, self.model_name, self.current_location))
             conn.commit()
-            print(f"✅ Vehículo ({vehicle_type}) registrado con modelo {self.model_name}")
+            print(f"✅ Vehículo ({vehicle_type}) registrado con modelo {self.model_name} en {self.current_location}")
         except Exception as e:
             print("❌ Error guardando el log del vehículo:", e)
         finally:
