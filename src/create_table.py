@@ -38,7 +38,7 @@ def create_test_table():
             print("⚠️ Añadiendo columna'facultad'...")
             cursor.execute('''
                 ALTER TABLE test_logs 
-                ADD COLUMN facultad VARCHAR(100) DEFAULT 'Desconocida' AFTER model_used
+                ADD COLUMN facultad VARCHAR(255) DEFAULT 'Desconocida' AFTER model_used
             ''')
         conn.commit()
         print("✅ Tabla de prueba 'test_logs' creada.")
