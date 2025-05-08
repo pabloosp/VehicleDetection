@@ -96,7 +96,7 @@ class YOLOProcessor:
                 # Guardar posición actual para el próximo frame
                 self.prev_centers[track_id] = (cx, cy)
 
-                # Dibujar línea de conteo y contador
+        # Dibujar línea de conteo y contador
         cv2.line(frame, (50, self.line_y), (370, self.line_y), (0, 0, 255), 3)  # Línea roja
         cv2.putText(frame, f"Vehicles: {self.vehicle_count}", (50, 50),
                    cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)  # Contador blanco
