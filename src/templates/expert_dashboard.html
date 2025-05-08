@@ -101,6 +101,17 @@
             </div>
             <button type="submit" class="btn btn-primary w-100">Subir Vídeo</button>
           </form>
+
+          {% if session.first_frame_path %}
+          <hr>
+          <div class="mt-3 text-center">
+            <h6>Dibuja la línea de conteo:</h6>
+            <canvas id="frameCanvas" width="640" height="480" style="border:1px solid #888;"></canvas>
+            <button class="btn btn-success mt-2 w-100" onclick="enviarLinea()">Confirmar línea</button>
+          </div>
+          {% endif %}
+
+          
           <!-- Mostrar coordenadas GPS -->
           {% if show_gps %}
             {% if gps_coords %}   <!--Si se detectan coordenadas las muestra, si no salta el form -->

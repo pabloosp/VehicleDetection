@@ -198,6 +198,16 @@ def expert_dashboard():
                 file_ext = os.path.splitext(video_file.filename)[1].lower() #Extraer extensión
                 tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix='file_ext')
                 video_file.save(tmp_file.name)
+                cap = cv2.VideoCapture(tmp_file.name)   #Extraer 1r frame
+                success, frame = cap.read()
+                cap.release()
+                if success:
+                    frame_path = tmp_file.name + "_first.jpg"
+                    cv2.imwrite(frame_path, frame)
+                    session['first_frame_path'] = frame_path
+                else:
+                    flash("No se pudo obtener el primer frame del vídeo", "danger")
+                    return redirect(url_for('expert_dashboard'))
             
             
                 gps_coords = get_gps_from_video(tmp_file.name)
@@ -337,6 +347,13 @@ def gen_frames():
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/first_frame_image')
+def first_frame_image():
+    frame_path = session.get('first_frame_path')
+    if frame_path and os.path.exists(frame_path):
+        return Response(open(frame_path, 'rb').read(), mimetype='image/jpeg')
+    return "Imagen no disponible", 404
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
