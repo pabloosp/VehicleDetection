@@ -108,6 +108,78 @@
             <h6>Dibuja la línea de conteo:</h6>
             <canvas id="frameCanvas" width="640" height="480" style="border:1px solid #888;"></canvas>
             <button class="btn btn-success mt-2 w-100" onclick="enviarLinea()">Confirmar línea</button>
+            <script>
+              const canvas = document.getElementById('frameCanvas');
+              const ctx = canvas.getContext('2d');
+              const img = new Image();
+              img.src = "{{ url_for('first_frame_image') }}";
+        
+              let start = null, end = null, isDrawing = false;
+        
+              img.onload = () => {
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+              };
+        
+              canvas.addEventListener('mousedown', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                start = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+                isDrawing = true;
+              });
+        
+              canvas.addEventListener('mousemove', (e) => {
+                if (!isDrawing) return;
+                const rect = canvas.getBoundingClientRect();
+                const current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                ctx.beginPath();
+                ctx.moveTo(start.x, start.y);
+                ctx.lineTo(current.x, current.y);
+                ctx.strokeStyle = "red";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+              });
+        
+              canvas.addEventListener('mouseup', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                end = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+                isDrawing = false;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                ctx.beginPath();
+                ctx.moveTo(start.x, start.y);
+                ctx.lineTo(end.x, end.y);
+                ctx.strokeStyle = "red";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+              });
+        
+              function enviarLinea() {
+                if (!start || !end) {
+                  alert("Dibuja una línea primero");
+                  return;
+                }
+        
+                fetch("/set_line", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json"
+                  },
+                  body: JSON.stringify({
+                    x1: start.x,
+                    y1: start.y,
+                    x2: end.x,
+                    y2: end.y
+                  })
+                }).then(res => {
+                  if (res.ok) {
+                    location.reload();
+                  } else {
+                    alert("Error al enviar la línea");
+                  }
+                });
+              }
+            </script>
           </div>
           {% endif %}
 
