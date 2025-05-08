@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, Response, make_response
+from flask import Flask, render_template, request, redirect, url_for, flash, session, Response, make_response, jsonify
 import os
 import cv2
 import tempfile
@@ -354,6 +354,22 @@ def first_frame_image():
     if frame_path and os.path.exists(frame_path):
         return Response(open(frame_path, 'rb').read(), mimetype='image/jpeg')
     return "Imagen no disponible", 404
+
+@app.route('/set_line', methods=['POST'])
+def set_line():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No se recibió línea"}), 400
+
+    # Guarda los puntos temporalmente en sesión
+    session['custom_line'] = {
+        "pt1": (int(data['x1']), int(data['y1'])),
+        "pt2": (int(data['x2']), int(data['y2']))
+    }
+
+    flash("✅ Línea de conteo definida correctamente. Puedes iniciar el análisis.", "success")
+    return jsonify({"status": "ok"})
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
