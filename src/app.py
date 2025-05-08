@@ -357,18 +357,39 @@ def first_frame_image():
 
 @app.route('/set_line', methods=['POST'])
 def set_line():
+    global video_source, global_processor, selected_model
+    
     data = request.get_json()
     if not data:
         return jsonify({"error": "No se recibió línea"}), 400
 
-    # Guarda los puntos temporalmente en sesión
-    session['custom_line'] = {
-        "pt1": (int(data['x1']), int(data['y1'])),
-        "pt2": (int(data['x2']), int(data['y2']))
-    }
+    pt1 = (int(data['x1']), int(data['y1']))
+    pt2 = (int(data['x2']), int(data['y2']))
 
-    flash("✅ Línea de conteo definida correctamente. Puedes iniciar el análisis.", "success")
-    return jsonify({"status": "ok"})
+    try:
+        # Recuperar datos guardados en sesión
+        tmp_video = session.pop('tmp_video_path')
+        model = session.pop('pending_model')
+        use_cuda = session.pop('pending_use_cuda')
+        location = session.pop('pending_location')
+
+        selected_model = model
+        video_source = tmp_video
+        global_processor = YOLOProcessor(model_path=model, use_cuda=use_cuda, default_location=location)
+        global_processor.set_line(pt1, pt2)
+
+        # Borrar la imagen del primer frame
+        if 'first_frame_path' in session:
+            try:
+                os.remove(session['first_frame_path'])
+            except:
+                pass
+            session.pop('first_frame_path')
+
+        session['video_ready'] = True
+        return jsonify({"status": "ok"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == '__main__':
