@@ -11,6 +11,7 @@ from video_metadata import get_gps_from_video
 import io
 import csv
 import torch
+from facultades import facultad_por_coordenadas
 ALLOWED_EXTENSIONS = {'.mov', '.mp4', '.avi'}
 
 try:
@@ -205,9 +206,20 @@ def expert_dashboard():
                 
                 if gps_coords:
                     gps_status = "success"
-                    location = f"Lat: {gps_coords['lat']:.6f}, Lon: {gps_coords['lon']:.6f}"
-                    session['gps_coords'] = location  
-                    flash("Coordenadas GPS detectadas correctamente", "success")
+                    lat = gps_coords['lat']
+                    lon = gps_coords['lon']
+                    
+                    facultad_detectada = facultad_por_coordenadas(lat, lon)
+                    
+                    if facultad_detectada:
+                        location = facultad_detectada
+                        session['gps_coords'] = location
+                        flash(f"Facultad detectada automáticamente: {facultad_detectada}", "success")
+                    else:
+                        location = f"Lat: {lat:.6f}, Lon: {lon:.6f}"
+                        session['gps_coords'] = location
+                        flash("Coordenadas detectadas, pero fuera de zonas conocidas. Se usarán las coordenadas...", "warning")
+
                     video_source = tmp_file.name
                     selected_model = model
                     global_processor = YOLOProcessor(
