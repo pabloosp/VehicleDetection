@@ -394,7 +394,6 @@ def set_line():
                 os.remove(first_frame_path)
             except:
                 pass
-            session.pop('first_frame_path')
 
         session['video_ready'] = True
         return jsonify({"status": "ok"})
