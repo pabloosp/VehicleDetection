@@ -76,6 +76,17 @@ def login():
 
 @app.route('/logout')
 def logout():
+    global video_source, global_processor, selected_model
+    for key in [
+        'tmp_video_path', 'pending_model', 'pending_use_cuda',
+        'pending_location', 'first_frame_path', 'selected_faculty',
+        'gps_coords', 'video_ready'
+    ]:
+        session.pop(key, None)
+    # Limpiar referencias globales
+    video_source = None
+    global_processor = None
+    selected_model = None
     session.clear()
     flash('Sesión cerrada.', 'info')
     return redirect(url_for('login'))
@@ -156,21 +167,7 @@ def expert_dashboard():
             session['selected_faculty'] = selected_faculty
             flash(f"Facultad asignada: {selected_faculty}", "success")
             
-        # Recuperamos los datos temporales
-            if 'tmp_video_path' in session and os.path.exists(session['tmp_video_path']):
-                    video_source = session['tmp_video_path']
-                    selected_model = session['pending_model']
-                    global_processor = YOLOProcessor(
-                        model_path=selected_model,
-                        use_cuda=session['pending_use_cuda'],
-                        default_location=selected_faculty
-                    )
-                    video_ready = True
-                    
-                    # Limpiar 
-                    session.pop('tmp_video_path')
-                    session.pop('pending_model')
-                    session.pop('pending_use_cuda')
+            session['pending_location'] = selected_faculty
 
             return redirect(url_for('expert_dashboard'))
         
@@ -230,14 +227,10 @@ def expert_dashboard():
                         session['gps_coords'] = location
                         flash("Coordenadas detectadas, pero fuera de zonas conocidas. Se usarán las coordenadas...", "warning")
 
-                    video_source = tmp_file.name
-                    selected_model = model
-                    global_processor = YOLOProcessor(
-                        model_path=model,
-                        use_cuda=use_cuda,
-                        default_location=location
-                    )
-                    video_ready = True
+                    session['tmp_video_path'] = tmp_file.name
+                    session['pending_model'] = model
+                    session['pending_use_cuda'] = use_cuda
+                    session['pending_location'] = location
                 else:
                     gps_status = "warning"
                     flash("Coordenadas no detectadas. Por favor seleccione la facultad manualmente", "warning")
@@ -367,11 +360,14 @@ def set_line():
     pt2 = (int(data['x2']), int(data['y2']))
 
     try:
-        # Recuperar datos guardados en sesión
-        tmp_video = session.pop('tmp_video_path')
-        model = session.pop('pending_model')
-        use_cuda = session.pop('pending_use_cuda')
-        location = session.pop('pending_location')
+        # Recuperar datos de sesión
+        tmp_video = session.pop('tmp_video_path', None)
+        model = session.pop('pending_model', None)
+        use_cuda = session.pop('pending_use_cuda', None)
+        location = session.pop('pending_location', None)
+
+        if not all([tmp_video, model, location]):
+            return jsonify({"error": "Datos de vídeo incompletos"}), 400
 
         selected_model = model
         video_source = tmp_video
@@ -379,9 +375,10 @@ def set_line():
         global_processor.set_line(pt1, pt2)
 
         # Borrar la imagen del primer frame
-        if 'first_frame_path' in session:
+        first_frame_path = session.pop('first_frame_path', None)
+        if first_frame_path and os.path.exists(first_frame_path):
             try:
-                os.remove(session['first_frame_path'])
+                os.remove(first_frame_path)
             except:
                 pass
             session.pop('first_frame_path')
