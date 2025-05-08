@@ -30,6 +30,11 @@ class YOLOProcessor:
         self.current_location = default_location  # Nuevo atributo
         
         print(f"Modelo cargado en: {self.device.upper()}")
+        
+    def set_line(self, pt1, pt2):
+        self.line_start = pt1
+        self.line_end = pt2
+        
 
     def reset_counter(self):
         """Reinicia todos los contadores y registros"""
@@ -82,22 +87,36 @@ class YOLOProcessor:
                 
                 # Verificar si el vehículo cruzó la línea
                 if track_id in self.prev_centers:
-                    prev_cy = self.prev_centers[track_id][1]  # Posición Y anterior
-                    # Si antes estaba arriba y ahora está abajo de la línea
-                    if prev_cy <= self.line_y and cy > self.line_y:
-                        if track_id not in self.crossed_ids:  # Si no ha sido contado
-                            self.crossed_ids.add(track_id)
-                            self.vehicle_count += 1
-                            
-                            # Guardar tipo de vehículo
-                            vehicle_type = "Coche" if class_idx == 2 else "Moto" if class_idx == 3 else "Furgoneta" if class_idx == 5 else "Camión"
-                            self.save_vehicle_log(vehicle_type)
+                    prev_point = self.prev_centers[track_id]
+                    curr_point = (cx, cy)
+
+                    def lines_intersect(a1, a2, b1, b2):
+                        """Verifica si los segmentos (a1, a2) y (b1, b2) se cruzan"""
+                        def ccw(p1, p2, p3):
+                            return (p3[1]-p1[1]) * (p2[0]-p1[0]) > (p2[1]-p1[1]) * (p3[0]-p1[0])
+                        return ccw(a1, b1, b2) != ccw(a2, b1, b2) and ccw(a1, a2, b1) != ccw(a1, a2, b2)
+
+                    if hasattr(self, 'line_start') and hasattr(self, 'line_end'):
+                        crossed = lines_intersect(prev_point, curr_point, self.line_start, self.line_end)
+                    else:
+                        crossed = prev_point[1] <= self.line_y and cy > self.line_y
+
+                    if crossed and track_id not in self.crossed_ids:
+                        self.crossed_ids.add(track_id)
+                        self.vehicle_count += 1
+                        vehicle_type = "Coche" if class_idx == 2 else "Moto" if class_idx == 3 else "Furgoneta" if class_idx == 5 else "Camión"
+                        self.save_vehicle_log(vehicle_type)
                 
                 # Guardar posición actual para el próximo frame
                 self.prev_centers[track_id] = (cx, cy)
 
         # Dibujar línea de conteo y contador
-        cv2.line(frame, (50, self.line_y), (370, self.line_y), (0, 0, 255), 3)  # Línea roja
+        # Dibuja línea personalizada si está definida
+        if hasattr(self, 'line_start') and hasattr(self, 'line_end'):
+            cv2.line(frame, self.line_start, self.line_end, (0, 0, 255), 3)
+        else:
+            cv2.line(frame, (50, self.line_y), (370, self.line_y), (0, 0, 255), 3)  # Línea roja
+            
         cv2.putText(frame, f"Vehicles: {self.vehicle_count}", (50, 50),
                    cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)  # Contador blanco
         return frame

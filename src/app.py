@@ -361,18 +361,31 @@ def set_line():
 
     try:
         # Recuperar datos de sesión
-        tmp_video = session.pop('tmp_video_path', None)
-        model = session.pop('pending_model', None)
-        use_cuda = session.pop('pending_use_cuda', None)
-        location = session.pop('pending_location', None)
+        tmp_video = session.get('tmp_video_path')
+        model = session.get('pending_model')
+        use_cuda = session.get('pending_use_cuda')
+        location = session.get('pending_location')
 
         if not all([tmp_video, model, location]):
             return jsonify({"error": "Datos de vídeo incompletos"}), 400
 
         selected_model = model
         video_source = tmp_video
+        print("DEBUG /set_line")
+        print("tmp_video:", tmp_video)
+        print("model:", model)
+        print("use_cuda:", use_cuda)
+        print("location:", location)
+        print("pt1:", pt1, "pt2:", pt2)
+        
         global_processor = YOLOProcessor(model_path=model, use_cuda=use_cuda, default_location=location)
         global_processor.set_line(pt1, pt2)
+        
+        # Ahora que todo ha ido bien, limpiamos la sesión
+        session.pop('tmp_video_path', None)
+        session.pop('pending_model', None)
+        session.pop('pending_use_cuda', None)
+        session.pop('pending_location', None)
 
         # Borrar la imagen del primer frame
         first_frame_path = session.pop('first_frame_path', None)
