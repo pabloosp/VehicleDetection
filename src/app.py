@@ -157,7 +157,7 @@ def expert_dashboard():
     show_faculty_form = False
     selected_faculty = None
     gps_status = None
-    video_ready = False
+    video_ready = session.get('video_ready', False)
     
     if request.method == 'POST':
         
@@ -221,10 +221,12 @@ def expert_dashboard():
                     if facultad_detectada:
                         location = facultad_detectada
                         session['gps_coords'] = location
+                        session['selected_faculty'] = location 
                         flash(f"Facultad detectada automáticamente: {facultad_detectada}", "success")
                     else:
                         location = f"Lat: {lat:.6f}, Lon: {lon:.6f}"
                         session['gps_coords'] = location
+                        session['selected_faculty'] = location
                         flash("Coordenadas detectadas, pero fuera de zonas conocidas. Se usarán las coordenadas...", "warning")
 
                     session['tmp_video_path'] = tmp_file.name
@@ -256,6 +258,7 @@ def expert_dashboard():
         if session.get('video_ready'):
             session.pop('first_frame_path', None)
 
+    selected_faculty = session.get('selected_faculty')
     return render_template('expert_dashboard.html', current_user=session.get('username', 'Desconocido'),selected_model=selected_model, cuda_available=torch.cuda.is_available(),gps_coords=gps_coords, show_gps=show_gps, show_faculty_form=show_faculty_form, selected_faculty=selected_faculty, gps_status=gps_status, video_ready=video_ready)
 
 @app.route('/export_csv/<start_date>/<end_date>')

@@ -102,7 +102,7 @@
             <button type="submit" class="btn btn-primary w-100">Subir Vídeo</button>
           </form>
 
-          {% if not video_ready and session.first_frame_path %}
+          {% if not video_ready and session.first_frame_path  and selected_faculty %}
           <hr>
           <div class="mt-3 text-center">
             <h6>Dibuja la línea de conteo:</h6>
