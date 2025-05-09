@@ -161,6 +161,10 @@ def expert_dashboard():
     
     if request.method == 'POST':
         
+        if session.get('video_ready'):
+            flash("Finaliza el procesamiento actual antes de subir un nuevo video.", "warning")
+            return redirect(url_for('expert_dashboard'))
+        
         #Form de selección de facultad
         if 'facultad' in request.form:
             selected_faculty = request.form['facultad']
@@ -406,6 +410,17 @@ def set_line():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/end_video', methods=['POST'])
+def end_video():
+    global video_source, global_processor, selected_model
+    video_source = None
+    selected_model = None
+    if global_processor:
+        global_processor.reset_counter()
+    session['video_ready'] = False
+    session.pop('selected_faculty', None)
+    flash("Procesamiento finalizado. Puedes subir un nuevo video.", "info")
+    return redirect(url_for('expert_dashboard'))
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

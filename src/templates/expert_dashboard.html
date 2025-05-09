@@ -102,6 +102,15 @@
             <button type="submit" class="btn btn-primary w-100">Subir Vídeo</button>
           </form>
 
+          {% if video_ready %}
+          <form method="POST" action="{{ url_for('end_video') }}">
+            <button type="submit" class="btn btn-danger w-100 mt-3">
+              Finalizar procesamiento
+            </button>
+          </form>
+          {% endif %}
+          
+
           {% if not video_ready and session.first_frame_path  and selected_faculty %}
           <hr>
           <div class="mt-3 text-center">
