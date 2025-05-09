@@ -18,6 +18,14 @@ def get_gps_from_video(file_path):
                         lat = float(match.group(1))
                         lon = float(match.group(2))
                         return {"lat": lat, "lon": lon}
+                    
+                # Caso para Google Pixel (campo 'xyz' comprobado con test3)
+                if "xyz" in raw_data and isinstance(raw_data["xyz"], str):
+                    match = re.match(r"^([+-]?\d+\.\d+)([+-]?\d+\.\d+)", raw_data["xyz"])
+                    if match:
+                        lat = float(match.group(1))
+                        lon = float(match.group(2))
+                        return {"lat": lat, "lon": lon}
                 
                 for key, value in raw_data.items():
                     if "location" in key.lower() and isinstance(value, str):
@@ -35,7 +43,7 @@ def get_gps_from_video(file_path):
         return None
 
 # Uso
-coords = get_gps_from_video("IMG_1932.mov")
+coords = get_gps_from_video("test3.mp4")
 if coords:
     print(f"✅ Coordenadas encontradas: Lat={coords['lat']}, Lon={coords['lon']}")
 else:
