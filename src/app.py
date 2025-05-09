@@ -252,6 +252,9 @@ def expert_dashboard():
         elif 'facultad' not in request.form:
             flash("No se ha seleccionado ningún archivo de video", "danger")
             return redirect(url_for('expert_dashboard'))
+        
+        if session.get('video_ready'):
+            session.pop('first_frame_path', None)
 
     return render_template('expert_dashboard.html', current_user=session.get('username', 'Desconocido'),selected_model=selected_model, cuda_available=torch.cuda.is_available(),gps_coords=gps_coords, show_gps=show_gps, show_faculty_form=show_faculty_form, selected_faculty=selected_faculty, gps_status=gps_status, video_ready=video_ready)
 
