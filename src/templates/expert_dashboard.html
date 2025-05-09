@@ -173,7 +173,7 @@
                   })
                 }).then(res => {
                   if (res.ok) {
-                    location.reload();
+                    window.location.href = "/expert_dashboard";
                   } else {
                     alert("Error al enviar la línea");
                   }

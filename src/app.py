@@ -193,7 +193,7 @@ def expert_dashboard():
             
             try:
                 file_ext = os.path.splitext(video_file.filename)[1].lower() #Extraer extensión
-                tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix='file_ext')
+                tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=file_ext)
                 video_file.save(tmp_file.name)
                 cap = cv2.VideoCapture(tmp_file.name)   #Extraer 1r frame
                 success, frame = cap.read()
