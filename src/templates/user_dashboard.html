@@ -54,6 +54,10 @@
 
     {% if chart_data %}
     <div class="report-section mt-4">
+      <div class="d-flex justify-content-between mb-2">
+        <button id="prevBtn" class="btn btn-outline-primary btn-sm">&larr; Día anterior</button>    <!--Botones paginación-->
+        <button id="nextBtn" class="btn btn-outline-primary btn-sm">Día siguiente &rarr;</button>
+      </div>
       <h4 class="mb-3">Gráfico de Vehículos por Día</h4>
       <canvas id="barChart" height="100"></canvas>
     </div>
@@ -109,33 +113,65 @@
       "Camión": "#FFB5B5"       // Rojo pastel
     };
 
-    const datasets = tiposVehiculos.map(tipo => ({
-      label: tipo,
-      data: rawData.map(d => d[tipo] || 0),
-      backgroundColor: colorMap[tipo] || "#D3D3D3"  // Gris claro por defecto
-    }));
-  
-    new Chart(document.getElementById("barChart"), {
-      type: 'bar',
-      data: {
-        labels: dias,
-        datasets: datasets
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { position: 'top' },
-          title: {
-            display: true,
-            text: 'Cantidad de Vehículos por Día y Tipo'
-          }
+    let startIndex = 0;
+    const maxDias = 7;
+
+    const ctx = document.getElementById("barChart").getContext("2d");
+    let chart;
+
+    function renderChart() {
+      const endIndex = Math.min(startIndex + maxDias, dias.length);
+      const diasVisibles = dias.slice(startIndex, endIndex);
+
+      const datasets = tiposVehiculos.map(tipo => ({
+        label: tipo,
+        data: diasVisibles.map(dia => {
+          const d = rawData.find(r => r.dia === dia);
+          return d ? (d[tipo] || 0) : 0;
+        }),
+        backgroundColor: colorMap[tipo] || "#D3D3D3"
+      }));
+
+      if (chart) chart.destroy();
+
+      chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: diasVisibles,
+          datasets: datasets
         },
-        scales: {
-          x: { stacked: true },
-          y: { stacked: true }
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'top' },
+            title: {
+              display: true,
+              text: 'Cantidad de Vehículos por Día y Tipo'
+            }
+          },
+          scales: {
+            x: { stacked: true },
+            y: { stacked: true }
+          }
         }
+      });
+    }
+
+    document.getElementById("prevBtn").addEventListener("click", () => {
+      if (startIndex > 0) {
+        startIndex--;
+        renderChart();
       }
     });
+
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      if (startIndex + maxDias < dias.length) {
+        startIndex++;
+        renderChart();
+      }
+    });
+
+    renderChart();
   </script>
   {% endif %}
 
