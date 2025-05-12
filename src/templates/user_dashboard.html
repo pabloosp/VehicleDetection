@@ -102,10 +102,17 @@
     const dias = rawData.map(d => d.dia);
     const tiposVehiculos = [...new Set(rawData.flatMap(d => Object.keys(d).filter(k => k !== "dia")))];
   
+    const colorMap = {
+      "Coche": "#A2C8EC",       // Azul pastel
+      "Moto": "#F9DC5C",        // Amarillo pastel
+      "Furgoneta": "#B5EAD7",   // Verde pastel
+      "Camión": "#FFB5B5"       // Rojo pastel
+    };
+
     const datasets = tiposVehiculos.map(tipo => ({
       label: tipo,
       data: rawData.map(d => d[tipo] || 0),
-      backgroundColor: `hsl(${Math.random() * 360}, 60%, 60%)`
+      backgroundColor: colorMap[tipo] || "#D3D3D3"  // Gris claro por defecto
     }));
   
     new Chart(document.getElementById("barChart"), {

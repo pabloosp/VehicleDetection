@@ -104,7 +104,13 @@ class YOLOProcessor:
                     if crossed and track_id not in self.crossed_ids:
                         self.crossed_ids.add(track_id)
                         self.vehicle_count += 1
-                        vehicle_type = "Coche" if class_idx == 2 else "Moto" if class_idx == 3 else "Furgoneta" if class_idx == 5 else "Camión"
+                        tipo_map = {
+                            2: "Coche",
+                            3: "Moto",
+                            5: "Furgoneta",
+                            7: "Camión"
+                        }
+                        vehicle_type = tipo_map.get(class_idx, f"Clase {class_idx}")
                         self.save_vehicle_log(vehicle_type)
                 
                 # Guardar posición actual para el próximo frame
