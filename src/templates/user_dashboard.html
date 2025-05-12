@@ -52,6 +52,14 @@
       </form>
     </div>
 
+    {% if chart_data %}
+    <div class="report-section mt-4">
+      <h4 class="mb-3">Gráfico de Vehículos por Día</h4>
+      <canvas id="barChart" height="100"></canvas>
+    </div>
+    {% endif %}
+
+
     <!-- Resultados -->
     {% if report_data %}
     <div class="report-section">
@@ -85,6 +93,44 @@
     </div>
     {% endif %}
   </div>
+
+  {% if chart_data %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const rawData = JSON.parse('{{ chart_data | tojson | safe }}');
+  
+    const dias = rawData.map(d => d.dia);
+    const tiposVehiculos = [...new Set(rawData.flatMap(d => Object.keys(d).filter(k => k !== "dia")))];
+  
+    const datasets = tiposVehiculos.map(tipo => ({
+      label: tipo,
+      data: rawData.map(d => d[tipo] || 0),
+      backgroundColor: `hsl(${Math.random() * 360}, 60%, 60%)`
+    }));
+  
+    new Chart(document.getElementById("barChart"), {
+      type: 'bar',
+      data: {
+        labels: dias,
+        datasets: datasets
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'top' },
+          title: {
+            display: true,
+            text: 'Cantidad de Vehículos por Día y Tipo'
+          }
+        },
+        scales: {
+          x: { stacked: true },
+          y: { stacked: true }
+        }
+      }
+    });
+  </script>
+  {% endif %}
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

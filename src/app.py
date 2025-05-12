@@ -130,10 +130,33 @@ def user_dashboard():
                 GROUP BY vehicle_type
             ''', (start_full_time, end_full_time))
             types = cursor.fetchall()
+            
+            # Consulta para gráfico por día y tipo
+            cursor.execute('''
+                SELECT DATE(timestamp) as dia, vehicle_type, COUNT(*) as count
+                FROM test_vehicle_logs
+                WHERE timestamp BETWEEN %s AND %s
+                GROUP BY dia, vehicle_type
+                ORDER BY dia ASC
+            ''', (start_full_time, end_full_time))
+            grouped_data = cursor.fetchall()
+
+            # Reestructurar para gráfico
+            from collections import defaultdict
+            chart_data = defaultdict(lambda: defaultdict(int))
+            for row in grouped_data:
+                chart_data[str(row['dia'])][row['vehicle_type']] = row['count']
+
+            # Convertir a lista para pasar a template
+            chart_data_formatted = [
+                {"dia": dia, **counts}
+                for dia, counts in chart_data.items()
+            ]
 
             report_data = {
                 'total': total,
-                'types': types  
+                'types': types,
+                'chart_data': chart_data_formatted  
             }
 
         except Exception as e:
@@ -142,6 +165,7 @@ def user_dashboard():
     return render_template(
         'user_dashboard.html',
         report_data=report_data,
+        chart_data=report_data['chart_data'] if report_data else None,
         start_date=start_date,
         end_date=end_date
     )
