@@ -228,10 +228,10 @@ def expert_dashboard():
                         session['selected_faculty'] = location 
                         flash(f"Facultad detectada automáticamente: {facultad_detectada}", "success")
                     else:
-                        location = f"Lat: {lat:.6f}, Lon: {lon:.6f}"
-                        session['gps_coords'] = location
-                        session['selected_faculty'] = location
-                        flash("Coordenadas detectadas, pero fuera de zonas conocidas. Se usarán las coordenadas...", "warning")
+                        location = None      #Mostrar form si tiene metadatos y no pertenecen a ninguna facultad
+                        session['gps_coords'] = f"Lat: {lat:.6f}, Lon: {lon:.6f}"
+                        show_faculty_form = True  
+                        flash("Coordenadas detectadas, pero fuera de zonas conocidas. Seleccione la facultad manualmente.", "warning")
 
                     session['tmp_video_path'] = tmp_file.name
                     session['pending_model'] = model
@@ -370,7 +370,7 @@ def set_line():
     pt2 = (int(data['x2']), int(data['y2']))
 
     try:
-        # Recuperar datos de sesión
+        # Recuperar datos de sesión (sin borrarlos aún)
         tmp_video = session.get('tmp_video_path')
         model = session.get('pending_model')
         use_cuda = session.get('pending_use_cuda')

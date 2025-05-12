@@ -195,43 +195,45 @@
           
           <!-- Mostrar coordenadas GPS -->
           {% if show_gps %}
-            {% if gps_coords %}   <!--Si se detectan coordenadas las muestra, si no salta el form -->
-              <div class="card mt-3 p-3 border rounded bg-light">
-                <h6 class="mb-2">Coordenadas detectadas</h6>
-                <div class="row">
-                  <div class="col-6">
-                      <p class="mb-1"><strong>Latitud:</strong></p>
-                      <p>{{ gps_coords['lat'] }}</p>
-                  </div>
-                  <div class="col-6">
-                      <p class="mb-1"><strong>Longitud:</strong></p>
-                      <p>{{ gps_coords['lon'] }}</p>
-                  </div>
+          {% if gps_coords and gps_coords.lat is defined %}
+            <div class="card mt-3 p-3 border rounded bg-light">
+              <h6 class="mb-2">Coordenadas detectadas</h6>
+              <div class="row">
+                <div class="col-6">
+                    <p class="mb-1"><strong>Latitud:</strong></p>
+                    <p>{{ gps_coords.lat }}</p>
+                </div>
+                <div class="col-6">
+                    <p class="mb-1"><strong>Longitud:</strong></p>
+                    <p>{{ gps_coords.lon }}</p>
                 </div>
               </div>
-            {% elif show_faculty_form %}
-              <div class="mt-3 p-3 border rounded bg-warning bg-opacity-10">
-                <h6 class="mb-3">⚠️ No se detectaron coordenadas</h6>
-                <form method="POST">
-                  <input type="hidden" name="is_faculty_form" value="true">   <!--"Bypassear"el form-->
-                  <select name="facultad" class="form-select mb-3" required>
-                    <option value="" disabled selected>-- Seleccione facultad --</option>
-                    <option value="EPS Vena">EPS Vena</option>
-                    <option value="EPS Milanera">EPS Milanera</option>
-                    <option value="Facultad Ciencias">Facultad de Ciencias</option>
-                    <option value="Facultad Económicas">Facultad de Ciencias Económicas y Empresariales</option>
-                    <option value="Facultad Educación">Facultad de Educación</option>
-                    <option value="Facultad Salud">Facultad de Ciencias de la Salud</option>
-                    <option value="Humanidades">Facultad de Humanidades y Comunicación</option>
-                    <option value="Facultad Derecho">Facultad de Derecho</option>
-                  </select>
-                  <button type="submit" class="btn btn-primary w-100">
-                    <i class="bi bi-check-circle"></i> Asignar Facultad
-                  </button>
-                </form>
-              </div>
+            </div>
             {% endif %}
+        
+          {% if show_faculty_form %}
+            <div class="mt-3 p-3 border rounded bg-warning bg-opacity-10">
+              <h6 class="mb-3">⚠️ No se pudo determinar la facultad a partir de las coordenadas</h6>
+              <form method="POST">
+                <input type="hidden" name="is_faculty_form" value="true">
+                <select name="facultad" class="form-select mb-3" required>
+                  <option value="" disabled selected>-- Seleccione facultad --</option>
+                  <option value="EPS Vena">EPS Vena</option>
+                  <option value="EPS Milanera">EPS Milanera</option>
+                  <option value="Facultad Ciencias">Facultad de Ciencias</option>
+                  <option value="Facultad Económicas">Facultad de Ciencias Económicas y Empresariales</option>
+                  <option value="Facultad Educación">Facultad de Educación</option>
+                  <option value="Facultad Salud">Facultad de Ciencias de la Salud</option>
+                  <option value="Humanidades">Facultad de Humanidades y Comunicación</option>
+                  <option value="Facultad Derecho">Facultad de Derecho</option>
+                </select>
+                <button type="submit" class="btn btn-primary w-100">
+                  Asignar Facultad
+                </button>
+              </form>
+            </div>
           {% endif %}
+        {% endif %}
 
           {% if selected_faculty %}
           <div class="mt-3 alert alert-success">
