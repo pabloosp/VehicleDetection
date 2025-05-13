@@ -144,14 +144,26 @@
         
               canvas.addEventListener('mousedown', (e) => {
                 const rect = canvas.getBoundingClientRect();
-                start = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+
+                start = {
+                  x: (e.clientX - rect.left) * scaleX,
+                  y: (e.clientY - rect.top) * scaleY
+                };
                 isDrawing = true;
               });
         
               canvas.addEventListener('mousemove', (e) => {
                 if (!isDrawing) return;
                 const rect = canvas.getBoundingClientRect();
-                const current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+
+                const current = {
+                  x: (e.clientX - rect.left) * scaleX,
+                  y: (e.clientY - rect.top) * scaleY
+                };
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                 ctx.beginPath();
@@ -164,7 +176,13 @@
         
               canvas.addEventListener('mouseup', (e) => {
                 const rect = canvas.getBoundingClientRect();
-                end = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+
+                end = {
+                  x: (e.clientX - rect.left) * scaleX,
+                  y: (e.clientY - rect.top) * scaleY
+                };
                 isDrawing = false;
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
