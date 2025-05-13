@@ -28,17 +28,27 @@ def create_test_table():
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 timestamp DATETIME NOT NULL,
                 vehicle_type VARCHAR(50) NOT NULL,
-                model_used VARCHAR(20) NOT NULL
+                model_used VARCHAR(20) NOT NULL,
+                facultad VARCHAR(255) DEFAULT 'Desconocida'
                 
             );
         ''')
-        #Añadir columna a tabla prueba
-        cursor.execute("SHOW COLUMNS FROM test_logs LIKE 'facultad'")
-        if not cursor.fetchone():  # Si la columna no existe
-            print("⚠️ Añadiendo columna'facultad'...")
+        # Añadir columna 'device_used' si no existe
+        cursor.execute("SHOW COLUMNS FROM test_logs LIKE 'device_used'")
+        if not cursor.fetchone():
+            print("⚠️ Añadiendo columna 'device_used'...")
             cursor.execute('''
                 ALTER TABLE test_logs 
-                ADD COLUMN facultad VARCHAR(255) DEFAULT 'Desconocida' AFTER model_used
+                ADD COLUMN device_used VARCHAR(10) DEFAULT 'CPU' AFTER facultad
+            ''')
+
+        # Añadir columna 'video_filename' si no existe
+        cursor.execute("SHOW COLUMNS FROM test_logs LIKE 'video_filename'")
+        if not cursor.fetchone():
+            print("⚠️ Añadiendo columna 'video_filename'...")
+            cursor.execute('''
+                ALTER TABLE test_logs 
+                ADD COLUMN video_filename VARCHAR(255) DEFAULT 'Desconocido' AFTER device_used
             ''')
         conn.commit()
         print("✅ Tabla de prueba 'test_logs' creada.")
