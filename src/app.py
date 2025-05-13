@@ -134,7 +134,7 @@ def user_dashboard():
             # Consulta para gráfico por día y tipo
             cursor.execute('''
                 SELECT DATE(timestamp) as dia, vehicle_type, COUNT(*) as count
-                FROM test_vehicle_logs
+                FROM test_logs
                 WHERE timestamp BETWEEN %s AND %s
                 GROUP BY dia, vehicle_type
                 ORDER BY dia ASC
@@ -306,7 +306,7 @@ def export_csv(start_date, end_date):
         cursor = conn.cursor(dictionary=True)
         
         cursor.execute('''
-            SELECT timestamp, vehicle_type, model_used 
+            SELECT timestamp, vehicle_type, model_used, facultad, device_used, video_filename
             FROM test_logs
             WHERE timestamp BETWEEN %s AND %s
             ORDER BY timestamp DESC
@@ -321,14 +321,17 @@ def export_csv(start_date, end_date):
         writer = csv.writer(output)
         
         # Cabeceras
-        writer.writerow(['Fecha y Hora', 'Tipo de Vehículo', 'Modelo Utilizado'])
+        writer.writerow(['Fecha y Hora', 'Tipo de Vehículo', 'Modelo YOLO', 'Facultad', 'Dispositivo', 'Nombre de archivo'])
         
         # Datos
         for record in records:
             writer.writerow([
                 record['timestamp'].strftime('%Y-%m-%d %H:%M:%S'),
                 record['vehicle_type'],
-                record['model_used']
+                record['model_used'],
+                record.get('facultad', 'N/A'),
+                record.get('device_used', 'N/A'),
+                record.get('video_filename', 'N/A')
             ])
         
         # Crear respuesta
