@@ -12,6 +12,7 @@ class YOLOProcessor:
     def __init__(self, model_path='yolo11s.pt', use_cuda=False, default_location="Desconocida"):
         #Configurar Cuda
         self.device = 'cuda' if (use_cuda and torch.cuda.is_available()) else 'cpu'
+        self.device_used_label = 'GPU' if self.device == 'cuda' else 'CPU'  #Guardar en los logs "GPU" en vez de "CUDA"
         # Cargar el modelo YOLO
         self.model = YOLO(model_path).to(self.device)
         # Guardar el nombre del modelo y quitar pt
@@ -52,7 +53,7 @@ class YOLOProcessor:
             cursor.execute('''
                 INSERT INTO test_logs (timestamp, vehicle_type, model_used, facultad, device_used, video_filename)
                 VALUES (%s, %s, %s, %s, %s, %s)
-            ''', (timestamp, vehicle_type, self.model_name, self.current_location,  self.device.upper(), self.current_video_filename))
+            ''', (timestamp, vehicle_type, self.model_name, self.current_location,  self.device_used_label, self.current_video_filename))
             conn.commit()
             print(f"✅ Vehículo ({vehicle_type}) registrado con modelo {self.model_name} en {self.current_location}")
         except Exception as e:
