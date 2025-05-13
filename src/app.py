@@ -223,6 +223,9 @@ def expert_dashboard():
                 file_ext = os.path.splitext(video_file.filename)[1].lower() #Extraer extensión
                 tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=file_ext)
                 video_file.save(tmp_file.name)
+                session['original_filename'] = video_file.filename
+                if global_processor:
+                    global_processor.current_video_filename = video_file.filename
                 cap = cv2.VideoCapture(tmp_file.name)   #Extraer 1r frame
                 success, frame = cap.read()
                 cap.release()
@@ -399,6 +402,7 @@ def set_line():
         model = session.get('pending_model')
         use_cuda = session.get('pending_use_cuda')
         location = session.get('pending_location')
+        original_filename = session.get('original_filename', 'Desconocido')
 
         if not all([tmp_video, model, location]):
             return jsonify({"error": "Datos de vídeo incompletos"}), 400
@@ -411,8 +415,10 @@ def set_line():
         print("use_cuda:", use_cuda)
         print("location:", location)
         print("pt1:", pt1, "pt2:", pt2)
+        print("original_filename:", original_filename)
         
         global_processor = YOLOProcessor(model_path=model, use_cuda=use_cuda, default_location=location)
+        global_processor.current_video_filename = original_filename
         global_processor.set_line(pt1, pt2)
         
         # Ahora que todo ha ido bien, limpiamos la sesión
@@ -420,6 +426,7 @@ def set_line():
         session.pop('pending_model', None)
         session.pop('pending_use_cuda', None)
         session.pop('pending_location', None)
+        session.pop('original_filename', None)
 
         # Borrar la imagen del primer frame
         first_frame_path = session.pop('first_frame_path', None)

@@ -28,6 +28,8 @@ class YOLOProcessor:
         self.prev_centers = {}
         # Ubi
         self.current_location = default_location  # Nuevo atributo
+        # Nombre file
+        self.current_video_filename = "Desconocido"
         
         print(f"Modelo cargado en: {self.device.upper()}")
         
@@ -48,9 +50,9 @@ class YOLOProcessor:
             cursor = conn.cursor()
             timestamp = datetime.datetime.now()  # Obtener la fecha y hora actuales
             cursor.execute('''
-                INSERT INTO test_logs (timestamp, vehicle_type, model_used, facultad)
-                VALUES (%s, %s, %s, %s)
-            ''', (timestamp, vehicle_type, self.model_name, self.current_location))
+                INSERT INTO test_logs (timestamp, vehicle_type, model_used, facultad, device_used, video_filename)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            ''', (timestamp, vehicle_type, self.model_name, self.current_location,  self.device.upper(), self.current_video_filename))
             conn.commit()
             print(f"✅ Vehículo ({vehicle_type}) registrado con modelo {self.model_name} en {self.current_location}")
         except Exception as e:
