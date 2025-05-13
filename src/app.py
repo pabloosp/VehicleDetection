@@ -5,8 +5,8 @@ import tempfile
 import time
 from yolo_processor import YOLOProcessor
 from db import get_connection
-#from create_table import create_vehicle_logs_table
-from create_table import create_test_table  # Cambiamos a la función para crear la tabla de prueba
+from create_table import create_vehicle_logs_table
+#from create_table import create_test_table  # Cambiamos a la función para crear la tabla de prueba
 from video_metadata import get_gps_from_video
 import io
 import csv
@@ -22,8 +22,8 @@ except Exception as e:
     print("❌ Error conectando a MySQL:", e)
 
 # Crear tabla si no existe
-#create_vehicle_logs_table()
-create_test_table()  # Cambiado a tabla de prueba
+create_vehicle_logs_table()
+#create_test_table()  # Cambiado a tabla de prueba
 
 
 
