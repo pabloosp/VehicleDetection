@@ -115,7 +115,7 @@ def user_dashboard():
             
             # Consulta total 
             cursor.execute('''
-                SELECT COUNT(*) as total FROM test_logs
+                SELECT COUNT(*) as total FROM vehicle_logs
                 WHERE timestamp BETWEEN %s AND %s
             ''', (start_full_time, end_full_time))
             total = cursor.fetchone()['total']
@@ -125,7 +125,7 @@ def user_dashboard():
                 SELECT 
                     vehicle_type as type,
                     COUNT(*) as count
-                FROM test_logs
+                FROM vehicle_logs
                 WHERE timestamp BETWEEN %s AND %s
                 GROUP BY vehicle_type
             ''', (start_full_time, end_full_time))
@@ -134,7 +134,7 @@ def user_dashboard():
             # Consulta para gráfico por día y tipo
             cursor.execute('''
                 SELECT DATE(timestamp) as dia, vehicle_type, COUNT(*) as count
-                FROM test_logs
+                FROM vehicle_logs
                 WHERE timestamp BETWEEN %s AND %s
                 GROUP BY dia, vehicle_type
                 ORDER BY dia ASC
@@ -307,7 +307,7 @@ def export_csv(start_date, end_date):
         
         cursor.execute('''
             SELECT timestamp, vehicle_type, model_used, facultad, device_used, video_filename
-            FROM test_logs
+            FROM vehicle_logs
             WHERE timestamp BETWEEN %s AND %s
             ORDER BY timestamp DESC
         ''', (start_full, end_full))

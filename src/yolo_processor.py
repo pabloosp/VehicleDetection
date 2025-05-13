@@ -51,7 +51,7 @@ class YOLOProcessor:
             cursor = conn.cursor()
             timestamp = datetime.datetime.now()  # Obtener la fecha y hora actuales
             cursor.execute('''
-                INSERT INTO test_logs (timestamp, vehicle_type, model_used, facultad, device_used, video_filename)
+                INSERT INTO vehicle_logs (timestamp, vehicle_type, model_used, facultad, device_used, video_filename)
                 VALUES (%s, %s, %s, %s, %s, %s)
             ''', (timestamp, vehicle_type, self.model_name, self.current_location,  self.device_used_label, self.current_video_filename))
             conn.commit()
