@@ -199,17 +199,21 @@
                   alert("Dibuja una línea primero");
                   return;
                 }
-        
+                
+                // Definir dimensiones reales del vídeo
+                const realWidth = 640;
+                const realHeight = 480;
+                
                 fetch("/set_line", {
                   method: "POST",
                   headers: {
                     "Content-Type": "application/json"
                   },
                   body: JSON.stringify({
-                    x1: start.x,
-                    y1: start.y,
-                    x2: end.x,
-                    y2: end.y
+                    x1: Math.round(start.x * (realWidth / canvas.width)),
+                    y1: Math.round(start.y * (realHeight / canvas.height)),
+                    x2: Math.round(end.x * (realWidth / canvas.width)),
+                    y2: Math.round(end.y * (realHeight / canvas.height))
                   })
                 }).then(res => {
                   if (res.ok) {
