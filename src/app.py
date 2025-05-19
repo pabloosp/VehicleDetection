@@ -11,6 +11,7 @@ from video_metadata import get_gps_from_video
 import io
 import csv
 import torch
+import datetime
 from facultades import facultad_por_coordenadas
 ALLOWED_EXTENSIONS = {'.mov', '.mp4', '.avi'}
 
@@ -153,10 +154,28 @@ def user_dashboard():
                 for dia, counts in chart_data.items()
             ]
 
+            # KPI: promedio por día
+            num_days = (datetime.datetime.strptime(end_date, "%Y-%m-%d") - datetime.datetime.strptime(start_date, "%Y-%m-%d")).days + 1
+            avg_per_day = round(total / num_days, 2) if num_days > 0 else 0
+
+            # KPI: día con más tráfico
+            daily_total = defaultdict(int)
+            for row in grouped_data:
+                daily_total[row['dia']] += row['count']
+            # KPI: día con más tráfico
+            busiest_day_raw = max(daily_total.items(), key=lambda x: x[1])[0] if daily_total else None
+            busiest_day = datetime.datetime.strptime(str(busiest_day_raw), "%Y-%m-%d").strftime("%d/%m/%Y") if busiest_day_raw else 'N/A'
+            # KPI: día con menos tráfico
+            quietest_day_raw = min(daily_total.items(), key=lambda x: x[1])[0] if daily_total else None
+            quietest_day = datetime.datetime.strptime(str(quietest_day_raw), "%Y-%m-%d").strftime("%d/%m/%Y") if quietest_day_raw else 'N/A'
+
             report_data = {
                 'total': total,
                 'types': types,
-                'chart_data': chart_data_formatted  
+                'chart_data': chart_data_formatted,
+                'avg_per_day': avg_per_day,
+                'busiest_day': busiest_day,
+                'quietest_day': quietest_day
             }
 
         except Exception as e:
