@@ -132,6 +132,20 @@ def user_dashboard():
             ''', (start_full_time, end_full_time))
             types = cursor.fetchall()
             
+            # KPI: Porcentaje por tipo (con número absoluto)
+            tipo_map = {"Coche": 0, "Moto": 0, "Furgoneta": 0, "Camión": 0}
+            for row in types:
+                tipo_map[row['type']] = row['count']
+
+            vehicle_percentages = []
+            for tipo, count in tipo_map.items():
+                percentage = round((count / total) * 100, 1) if total > 0 else 0
+                vehicle_percentages.append({
+                    'type': tipo,
+                    'count': count,
+                    'percentage': percentage
+                })
+
             # Consulta para gráfico por día y tipo
             cursor.execute('''
                 SELECT DATE(timestamp) as dia, vehicle_type, COUNT(*) as count
@@ -175,7 +189,8 @@ def user_dashboard():
                 'chart_data': chart_data_formatted,
                 'avg_per_day': avg_per_day,
                 'busiest_day': busiest_day,
-                'quietest_day': quietest_day
+                'quietest_day': quietest_day,
+                'vehicle_percentages': vehicle_percentages
             }
 
         except Exception as e:

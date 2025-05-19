@@ -103,7 +103,24 @@
 
         <!-- Columna 2: Porcentaje por tipo -->
         <div class="col-md-4">
-          
+          <div class="card p-3 shadow-sm text-center h-100">
+            <h6 class="mb-3">Porcentajes por tipo</h6>
+            <div class="row row-cols-2 g-2">
+              {% for veh in report_data.vehicle_percentages %}
+              <div class="col d-flex flex-column align-items-center justify-content-center">
+                <div class="fs-5">
+                  {% if veh.type == 'Coche' %} 🚗
+                  {% elif veh.type == 'Moto' %} 🏍️
+                  {% elif veh.type == 'Furgoneta' %} 🚐
+                  {% elif veh.type == 'Camión' %} 🚛
+                  {% endif %}
+                </div>
+                <small class="fw-bold">{{ veh.percentage }}%</small>
+                <small class="text-muted">{{ veh.type }} ({{ veh.count }})</small>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
         </div>
 
         <!-- Columna 3: KPIs técnicos -->
