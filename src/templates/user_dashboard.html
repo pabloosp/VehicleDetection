@@ -70,29 +70,24 @@
         
         <!-- Columna 1: KPIs generales en 2x2 -->
         <div class="col-md-4">
-          <div class="row g-2">
-            <div class="col-6">
-              <div class="card text-center p-2" style="min-height: 80px;">
-                <h6 class="mb-1 small">Total</h6>
-                <p class="fs-6 mb-0">{{ report_data.total }}</p>
+          <div class="card p-3 h-100">
+            <h6 class="text-center mb-3">Resumen general</h6>
+            <div class="row text-center">
+              <div class="col-6 mb-3">
+                <strong>Total</strong><br>
+                {{ report_data.total }}
               </div>
-            </div>
-            <div class="col-6">
-              <div class="card text-center p-2" style="min-height: 80px;">
-                <h6 class="mb-1 small">Promedio/día</h6>
-                <p class="fs-6 mb-0">{{ report_data.avg_per_day }}</p>
+              <div class="col-6 mb-3">
+                <strong>Promedio/día</strong><br>
+                {{ report_data.avg_per_day }}
               </div>
-            </div>
-            <div class="col-6">
-              <div class="card text-center p-2" style="min-height: 80px;">
-                <h6 class="mb-1 small">Día más tráfico</h6>
-                <p class="fs-6 mb-0">{{ report_data.busiest_day }}</p>
+              <div class="col-6">
+                <strong>Día más tráfico</strong><br>
+                {{ report_data.busiest_day }}
               </div>
-            </div>
-            <div class="col-6">
-              <div class="card text-center p-2" style="min-height: 80px;">
-                <h6 class="mb-1 small">Día menos tráfico</h6>
-                <p class="fs-6 mb-0">{{ report_data.quietest_day }}</p>
+              <div class="col-6">
+                <strong>Día menos tráfico</strong><br>
+                {{ report_data.quietest_day }}
               </div>
             </div>
           </div>
