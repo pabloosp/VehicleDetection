@@ -15,6 +15,15 @@
       padding: 20px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
+    .kpi-card {
+      min-height: 270px;
+    }
+    .kpi-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
   </style>
 </head>
 <body>
@@ -66,82 +75,85 @@
     {% if report_data %}
     <div class="report-section mt-4">
       <h4 class="mb-3">Resumen del periodo ({{ start_date }} al {{ end_date }})</h4>
-      <div class="row text-center">
+      <div class="row text-center align-items-stretch">
         
         <!-- Columna 1: KPIs generales en 2x2 -->
         <div class="col-md-4">
-          <div class="card p-3 h-100">
-            <h6 class="text-center mb-3">Resumen general</h6>
-            <div class="row text-center">
-              <div class="col-6 mb-3">
-                <strong>Total</strong><br>
-                {{ report_data.total }}
-              </div>
-              <div class="col-6 mb-3">
-                <strong>Promedio/día</strong><br>
-                {{ report_data.avg_per_day }}
-              </div>
-              <div class="col-6">
-                <strong>Día más tráfico</strong><br>
-                {{ report_data.busiest_day }}
-              </div>
-              <div class="col-6">
-                <strong>Día menos tráfico</strong><br>
-                {{ report_data.quietest_day }}
+          <div class="card p-3 text-center kpi-card d-flex flex-column">
+            <h6 class="mb-3">Resumen general</h6>
+            <div class="kpi-content">
+              <div class="row">
+                <div class="col-6 mb-3">
+                  <strong>Total</strong><br>
+                  {{ report_data.total }}
+                </div>
+                <div class="col-6 mb-3">
+                  <strong>Promedio/día</strong><br>
+                  {{ report_data.avg_per_day }}
+                </div>
+                <div class="col-6">
+                  <strong>Día más tráfico</strong><br>
+                  {{ report_data.busiest_day }}
+                </div>
+                <div class="col-6">
+                  <strong>Día menos tráfico</strong><br>
+                  {{ report_data.quietest_day }}
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-
-
-
-        <!-- Columna 2: Porcentaje por tipo -->
+     <!-- Columna 2: Porcentaje por tipo -->
         <div class="col-md-4">
-          <div class="card p-3 shadow-sm text-center h-100">
+          <div class="card p-3 text-center kpi-card d-flex flex-column">
             <h6 class="mb-3">Porcentajes por tipo</h6>
-            <div class="row row-cols-2 g-2">
-              {% for veh in report_data.vehicle_percentages %}
-              <div class="col d-flex flex-column align-items-center justify-content-center">
-                <div class="mb-1">
-                  {% if veh.type == 'Coche' %}
-                    <img src="{{ url_for('static', filename='icons/coche.png') }}" alt="Coche" width="36">
-                  {% elif veh.type == 'Moto' %}
-                    <img src="{{ url_for('static', filename='icons/moto.png') }}" alt="Moto" width="36">
-                  {% elif veh.type == 'Furgoneta' %}
-                    <img src="{{ url_for('static', filename='icons/furgoneta.png') }}" alt="Furgoneta" width="36">
-                  {% elif veh.type == 'Camión' %}
-                    <img src="{{ url_for('static', filename='icons/camion.png') }}" alt="Camión" width="36">
-                  {% endif %}
+            <div class="kpi-content">
+              <div class="row row-cols-2 g-2">
+                {% for veh in report_data.vehicle_percentages %}
+                <div class="col d-flex flex-column align-items-center justify-content-center">
+                  <div class="mb-1">
+                    {% if veh.type == 'Coche' %}
+                      <img src="{{ url_for('static', filename='icons/coche.png') }}" alt="Coche" width="36">
+                    {% elif veh.type == 'Moto' %}
+                      <img src="{{ url_for('static', filename='icons/moto.png') }}" alt="Moto" width="36">
+                    {% elif veh.type == 'Furgoneta' %}
+                      <img src="{{ url_for('static', filename='icons/furgoneta.png') }}" alt="Furgoneta" width="36">
+                    {% elif veh.type == 'Camión' %}
+                      <img src="{{ url_for('static', filename='icons/camion.png') }}" alt="Camión" width="36">
+                    {% endif %}
+                  </div>
+                  <small class="fw-bold">{{ veh.percentage }}%</small>
+                  <small class="text-muted">{{ veh.type }} ({{ veh.count }})</small>
                 </div>
-                <small class="fw-bold">{{ veh.percentage }}%</small>
-                <small class="text-muted">{{ veh.type }} ({{ veh.count }})</small>
+                {% endfor %}
               </div>
-              {% endfor %}
             </div>
           </div>
         </div>
 
         <!-- Columna 3: KPIs técnicos -->
         <div class="col-md-4">
-          <div class="card p-3 h-100 text-center">
-            <h6 class="mb-3">Estadísticas técnicos</h6>
-            <div class="row text-center">
-              <div class="col-6 mb-3">
-                <strong>Modelo más usado</strong><br>
-                {{ report_data.top_model }}
-              </div>
-              <div class="col-6 mb-3">
-                <strong>Vídeos distintos</strong><br>
-                {{ report_data.video_count }}
-              </div>
-              <div class="col-6">
-                <strong>Facultad más activa</strong><br>
-                {{ report_data.top_faculty }}
-              </div>
-              <div class="col-6">
-                <strong>Facultad menos activa</strong><br>
-                {{ report_data.low_faculty }}
+          <div class="card p-3 text-center kpi-card d-flex flex-column">
+            <h6 class="mb-3">Estadísticas técnicas</h6>
+            <div class="kpi-content">
+              <div class="row">
+                <div class="col-6 mb-3">
+                  <strong>Modelo más usado</strong><br>
+                  {{ report_data.top_model }}
+                </div>
+                <div class="col-6 mb-3">
+                  <strong>Vídeos distintos</strong><br>
+                  {{ report_data.video_count }}
+                </div>
+                <div class="col-6">
+                  <strong>Facultad más activa</strong><br>
+                  {{ report_data.top_faculty }}
+                </div>
+                <div class="col-6">
+                  <strong>Facultad menos activa</strong><br>
+                  {{ report_data.low_faculty }}
+                </div>
               </div>
             </div>
           </div>
