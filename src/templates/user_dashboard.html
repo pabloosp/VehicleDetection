@@ -124,7 +124,27 @@
 
         <!-- Columna 3: KPIs técnicos -->
         <div class="col-md-4">
-          
+          <div class="card p-3 h-100 text-center">
+            <h6 class="mb-3">Estadísticas técnicos</h6>
+            <div class="row text-center">
+              <div class="col-6 mb-3">
+                <strong>Modelo más usado</strong><br>
+                {{ report_data.top_model }}
+              </div>
+              <div class="col-6 mb-3">
+                <strong>Vídeos distintos</strong><br>
+                {{ report_data.video_count }}
+              </div>
+              <div class="col-6">
+                <strong>Facultad más activa</strong><br>
+                {{ report_data.top_faculty }}
+              </div>
+              <div class="col-6">
+                <strong>Facultad menos activa</strong><br>
+                {{ report_data.low_faculty }}
+              </div>
+            </div>
+          </div>
         </div>
         
       </div>
