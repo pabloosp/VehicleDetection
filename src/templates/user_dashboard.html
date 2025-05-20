@@ -186,10 +186,10 @@
           <tr>
             <td>{{ f.facultad }}</td>
             <td>{{ f.total }}</td>
-            <td>{{ f.coche }}</td>
-            <td>{{ f.moto }}</td>
-            <td>{{ f.furgoneta }}</td>
-            <td>{{ f.camion }}</td>
+            <td data-order="{{ f.coche_value }}">{{ f.coche }}</td>
+            <td data-order="{{ f.moto_value }}">{{ f.moto }}</td>
+            <td data-order="{{ f.furgoneta_value }}">{{ f.furgoneta }}</td>
+            <td data-order="{{ f.camion_value }}">{{ f.camion }}</td>
             <td>{{ f.videos }}</td>
           </tr>
           {% endfor %}

@@ -248,19 +248,29 @@ def user_dashboard():
 
             for row in facultades_rows:
                 total = row['total']
-                def fmt(count):  # formato "35% (7)"
+                def fmt(count):  # formato "7 (35%)
                     pct = round((count / total) * 100, 1) if total > 0 else 0
-                    return f"{pct}% ({count})"
+                    return count, f"{count} ({pct}%)"
                 
+                val_coche, label_coche = fmt(row['coche'])
+                val_moto, label_moto = fmt(row['moto'])
+                val_furg, label_furg = fmt(row['furgoneta'])
+                val_camion, label_camion = fmt(row['camion'])
+
                 facultades_data.append({
                     'facultad': row['facultad'],
                     'total': total,
-                    'coche': fmt(row['coche']),
-                    'moto': fmt(row['moto']),
-                    'furgoneta': fmt(row['furgoneta']),
-                    'camion': fmt(row['camion']),
+                    'coche': label_coche,
+                    'coche_value': val_coche,
+                    'moto': label_moto,
+                    'moto_value': val_moto,
+                    'furgoneta': label_furg,
+                    'furgoneta_value': val_furg,
+                    'camion': label_camion,
+                    'camion_value': val_camion,
                     'videos': row['videos']
                 })
+
     
             report_data = {
                 'total': total,
