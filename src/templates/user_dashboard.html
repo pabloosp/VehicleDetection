@@ -164,38 +164,47 @@
     {% endif %}
 
 
-    <!-- Resultados -->
-    {% if report_data %}
-    <div class="report-section">
-      <h4 class="mb-3">Resultados ({{ start_date }} al {{ end_date }})</h4>
-      <div class="alert alert-info">
-        Total vehículos detectados: <strong>{{ report_data.total }}</strong>
-      </div>
-      
-      <table class="table table-hover">
+    <!-- Tabla -->
+    {% if report_data.facultades %}
+    <div class="report-section mt-4">
+      <h4 class="mb-3">Resumen por Facultad</h4>
+
+      <table id="tablaFacultades" class="table table-striped table-bordered text-center align-middle">
         <thead class="table-light">
           <tr>
-            <th>Tipo</th>
-            <th>Cantidad</th>
+            <th>Facultad</th>
+            <th>Total</th>
+            <th><img src="{{ url_for('static', filename='icons/coche.png') }}" alt="Coche" width="20"> Coche</th>
+            <th><img src="{{ url_for('static', filename='icons/moto.png') }}" alt="Moto" width="20"> Moto</th>
+            <th><img src="{{ url_for('static', filename='icons/furgoneta.png') }}" alt="Furgoneta" width="20"> Furgoneta</th>
+            <th><img src="{{ url_for('static', filename='icons/camion.png') }}" alt="Camión" width="20"> Camión</th>
+            <th>Vídeos</th>
           </tr>
         </thead>
         <tbody>
-          {% for vehicle in report_data.types %}
+          {% for f in report_data.facultades %}
           <tr>
-            <td>{{ vehicle.type }}</td>
-            <td>{{ vehicle.count }}</td>
+            <td>{{ f.facultad }}</td>
+            <td>{{ f.total }}</td>
+            <td>{{ f.coche }}</td>
+            <td>{{ f.moto }}</td>
+            <td>{{ f.furgoneta }}</td>
+            <td>{{ f.camion }}</td>
+            <td>{{ f.videos }}</td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
-      <div class="text-center mt-4">
+
+      <div class="text-end mt-3">
         <a href="{{ url_for('export_csv', start_date=start_date, end_date=end_date) }}" 
-           class="btn btn-success">
-           <i class="bi bi-file-earmark-excel"></i> Exportar a CSV
+          class="btn btn-success">
+          <i class="bi bi-file-earmark-excel"></i> Exportar CSV
         </a>
       </div>
     </div>
     {% endif %}
+
   </div>
 
   {% if chart_data %}
@@ -282,6 +291,23 @@
       Iconos por <a href="https://www.flaticon.es" target="_blank" style="color: #adb5bd; text-decoration: none;">Flaticon</a>
     </small>
   </footer>
+
+  <!-- DataTables + jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+
+<script>
+  $(document).ready(function() {
+    $('#tablaFacultades').DataTable({
+      order: [[1, 'desc']],
+      language: {
+        url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+      }
+    });
+  });
+</script>
+
 
 </body>
 </html>

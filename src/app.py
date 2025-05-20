@@ -229,7 +229,39 @@ def user_dashboard():
             low_faculty = cursor.fetchone()
             low_faculty_name = low_faculty['facultad'] if low_faculty else "N/A"
 
+            cursor.execute('''
+                SELECT facultad,
+                    COUNT(*) AS total,
+                    SUM(vehicle_type = 'Coche') AS coche,
+                    SUM(vehicle_type = 'Moto') AS moto,
+                    SUM(vehicle_type = 'Furgoneta') AS furgoneta,
+                    SUM(vehicle_type = 'Camión') AS camion,
+                    COUNT(DISTINCT video_filename) AS videos
+                FROM vehicle_logs
+                WHERE facultad IS NOT NULL AND facultad != ''
+                AND timestamp BETWEEN %s AND %s
+                GROUP BY facultad
+            ''', (start_full_time, end_full_time))
 
+            facultades_rows = cursor.fetchall()
+            facultades_data = []
+
+            for row in facultades_rows:
+                total = row['total']
+                def fmt(count):  # formato "35% (7)"
+                    pct = round((count / total) * 100, 1) if total > 0 else 0
+                    return f"{pct}% ({count})"
+                
+                facultades_data.append({
+                    'facultad': row['facultad'],
+                    'total': total,
+                    'coche': fmt(row['coche']),
+                    'moto': fmt(row['moto']),
+                    'furgoneta': fmt(row['furgoneta']),
+                    'camion': fmt(row['camion']),
+                    'videos': row['videos']
+                })
+    
             report_data = {
                 'total': total,
                 'types': types,
@@ -241,7 +273,8 @@ def user_dashboard():
                 'top_model': top_model_name,
                 'video_count': video_count,
                 'top_faculty': top_faculty_name,
-                'low_faculty': low_faculty_name
+                'low_faculty': low_faculty_name,
+                'facultades': facultades_data
             }
 
         except Exception as e:
