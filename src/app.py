@@ -182,6 +182,53 @@ def user_dashboard():
             # KPI: día con menos tráfico
             quietest_day_raw = min(daily_total.items(), key=lambda x: x[1])[0] if daily_total else None
             quietest_day = datetime.datetime.strptime(str(quietest_day_raw), "%Y-%m-%d").strftime("%d/%m/%Y") if quietest_day_raw else 'N/A'
+            
+            #3 col KPI
+            # Modelo más usado
+            cursor.execute('''
+                SELECT model_used, COUNT(*) as count
+                FROM vehicle_logs
+                WHERE timestamp BETWEEN %s AND %s
+                GROUP BY model_used
+                ORDER BY count DESC
+                LIMIT 1
+            ''', (start_full_time, end_full_time))
+            top_model = cursor.fetchone()
+            top_model_name = top_model['model_used'] if top_model else "N/A"
+
+            # Vídeos distintos
+            cursor.execute('''
+                SELECT COUNT(DISTINCT video_filename) as video_count
+                FROM vehicle_logs
+                WHERE timestamp BETWEEN %s AND %s
+            ''', (start_full_time, end_full_time))
+            video_count = cursor.fetchone()['video_count']
+
+            # Facultad más registrada
+            cursor.execute('''
+                SELECT facultad, COUNT(*) as count
+                FROM vehicle_logs
+                WHERE timestamp BETWEEN %s AND %s
+                GROUP BY facultad
+                ORDER BY count DESC
+                LIMIT 1
+            ''', (start_full_time, end_full_time))
+            top_faculty = cursor.fetchone()
+            top_faculty_name = top_faculty['facultad'] if top_faculty else "N/A"
+
+            # Facultad menos registrada
+            cursor.execute('''
+                SELECT facultad, COUNT(*) as count
+                FROM vehicle_logs
+                WHERE facultad IS NOT NULL AND facultad != ''
+                AND timestamp BETWEEN %s AND %s
+                GROUP BY facultad
+                ORDER BY count ASC
+                LIMIT 1
+            ''', (start_full_time, end_full_time))
+            low_faculty = cursor.fetchone()
+            low_faculty_name = low_faculty['facultad'] if low_faculty else "N/A"
+
 
             report_data = {
                 'total': total,
@@ -190,7 +237,11 @@ def user_dashboard():
                 'avg_per_day': avg_per_day,
                 'busiest_day': busiest_day,
                 'quietest_day': quietest_day,
-                'vehicle_percentages': vehicle_percentages
+                'vehicle_percentages': vehicle_percentages,
+                'top_model': top_model_name,
+                'video_count': video_count,
+                'top_faculty': top_faculty_name,
+                'low_faculty': low_faculty_name
             }
 
         except Exception as e:
