@@ -247,9 +247,9 @@ def user_dashboard():
             facultades_data = []
 
             for row in facultades_rows:
-                total = row['total']
+                total_facultad = row['total']
                 def fmt(count):  # formato "7 (35%)
-                    pct = round((count / total) * 100, 1) if total > 0 else 0
+                    pct = round((count / total_facultad) * 100, 1) if total_facultad > 0 else 0
                     return count, f"{count} ({pct}%)"
                 
                 val_coche, label_coche = fmt(row['coche'])
@@ -259,7 +259,7 @@ def user_dashboard():
 
                 facultades_data.append({
                     'facultad': row['facultad'],
-                    'total': total,
+                    'total': total_facultad,
                     'coche': label_coche,
                     'coche_value': val_coche,
                     'moto': label_moto,
