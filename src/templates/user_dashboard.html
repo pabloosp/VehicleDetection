@@ -34,6 +34,12 @@
       <div class="d-flex align-items-center">
         <span class="text-white me-2">Usuario: {{ session.username }}</span>
         <a class="btn btn-outline-light" href="{{ url_for('logout') }}">Cerrar sesión</a>
+        <form action="{{ url_for('set_lang', lang='') }}" method="get" onsubmit="this.action='/set_lang/' + this.lang.value" class="ms-2">
+          <select name="lang" onchange="this.form.submit()" class="form-select form-select-sm">
+            <option value="es" {% if session.get('lang', 'es') == 'es' %}selected{% endif %}>ES</option>
+            <option value="en" {% if session.get('lang', 'es') == 'en' %}selected{% endif %}>EN</option>
+          </select>
+        </form>
       </div>
     </div>
   </nav>
