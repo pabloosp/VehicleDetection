@@ -13,6 +13,8 @@ import csv
 import torch
 import datetime
 from facultades import facultad_por_coordenadas
+from flask import g
+from translations import translations
 ALLOWED_EXTENSIONS = {'.mov', '.mp4', '.avi'}
 
 try:
@@ -47,6 +49,11 @@ def check_valid_session():
             flash('La sesión expiró. Inicia sesión nuevamente.', 'warning')
             return redirect(url_for('login'))
 
+@app.before_request
+def set_language():
+    lang = session.get('lang', 'es')  # Idioma por defecto
+    g.t = translations.get(lang, translations['es'])
+
 @app.route('/')
 def index():
     if 'username' in session:
@@ -73,7 +80,7 @@ def login():
         
         else:
             flash('Credenciales incorrectas.', 'danger')
-    return render_template('login.html')
+    return render_template('login.html', t=g.t)
 
 @app.route('/logout')
 def logout():
@@ -295,7 +302,7 @@ def user_dashboard():
         report_data=report_data,
         chart_data=report_data['chart_data'] if report_data else None,
         start_date=start_date,
-        end_date=end_date
+        end_date=end_date, t=g.t
     )
 
 @app.route('/expert_dashboard', methods=['GET', 'POST'])
@@ -418,7 +425,7 @@ def expert_dashboard():
             session.pop('first_frame_path', None)
 
     selected_faculty = session.get('selected_faculty')
-    return render_template('expert_dashboard.html', current_user=session.get('username', 'Desconocido'),selected_model=selected_model, cuda_available=torch.cuda.is_available(),gps_coords=gps_coords, show_gps=show_gps, show_faculty_form=show_faculty_form, selected_faculty=selected_faculty, gps_status=gps_status, video_ready=video_ready)
+    return render_template('expert_dashboard.html', current_user=session.get('username', 'Desconocido'),selected_model=selected_model, cuda_available=torch.cuda.is_available(),gps_coords=gps_coords, show_gps=show_gps, show_faculty_form=show_faculty_form, selected_faculty=selected_faculty, gps_status=gps_status, video_ready=video_ready, t=g.t)
 
 @app.route('/export_csv/<start_date>/<end_date>')
 def export_csv(start_date, end_date):
@@ -583,6 +590,12 @@ def end_video():
     session.pop('selected_faculty', None)
     flash("Procesamiento finalizado. Puedes subir un nuevo video.", "info")
     return redirect(url_for('expert_dashboard'))
+
+@app.route('/set_lang/<lang>')
+def set_lang(lang):
+    if lang in translations:
+        session['lang'] = lang
+    return redirect(request.referrer or url_for('index'))
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
