@@ -30,6 +30,18 @@
     </style>
 </head>
 <body>
+  <!-- Selector de idioma arriba a la derecha -->
+  <div class="position-absolute top-0 end-0 p-3">
+    <form action="{{ url_for('set_lang', lang='') }}" method="get"
+          onsubmit="this.action='/set_lang/' + this.lang.value">
+      <select name="lang" onchange="this.form.submit()" class="form-select form-select-sm">
+        <option value="es" {% if session.get('lang', 'es') == 'es' %}selected{% endif %}>ES</option>
+        <option value="en" {% if session.get('lang', 'es') == 'en' %}selected{% endif %}>EN</option>
+      </select>
+    </form>
+  </div>
+
+
   <div class="container">
     <div class="login-container">
       <h2 class="login-title">Vehicle Detection</h2>
