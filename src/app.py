@@ -79,7 +79,7 @@ def login():
             return redirect(url_for('user_dashboard'))  # Nueva ruta
         
         else:
-            flash('Credenciales incorrectas.', 'danger')
+            flash(g.t['invalid_credentials'], 'danger')
     return render_template('login.html', t=g.t)
 
 @app.route('/logout')
@@ -96,7 +96,7 @@ def logout():
     global_processor = None
     selected_model = None
     session.clear()
-    flash('Sesión cerrada.', 'info')
+    flash(g.t['session_closed'], 'info')
     return redirect(url_for('login'))
 
 @app.route('/user_dashboard', methods=['GET', 'POST'])
