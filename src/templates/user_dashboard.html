@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>User Dashboard - Vehicle Detection</title>
+  <title>{{ t['user_panel'] }} - {{ t['vehicle_detection'] }}</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <style>
     body {
@@ -30,10 +30,10 @@
   <!-- Navbar idéntico al dashboard de expert -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">Vehicle Detection</a>
+      <a class="navbar-brand" href="#">{{ t['vehicle_detection'] }}</a>
       <div class="d-flex align-items-center">
-        <span class="text-white me-2">Usuario: {{ session.username }}</span>
-        <a class="btn btn-outline-light" href="{{ url_for('logout') }}">Cerrar sesión</a>
+        <span class="text-white me-2">{{ t['username'] }}: {{ session.username }}</span>
+        <a class="btn btn-outline-light" href="{{ url_for('logout') }}">{{ t['logout'] }}</a>
         <form id="langForm" class="ms-2">
           <select id="langSelect" class="form-select form-select-sm" onchange="cambiarIdioma(this)">
             <option value="es" {% if session.get('lang', 'es') == 'es' %}selected{% endif %}>ES</option>
@@ -54,22 +54,22 @@
 
   <!-- Contenedor principal -->
   <div class="container py-4">
-    <h2 class="mb-4">Informes</h2>
+    <h2 class="mb-4">{{ t['report'] }}</h2>
     
     <!-- Formulario de Fechas -->
     <div class="report-section mb-4">
       <form method="POST" action="{{ url_for('user_dashboard') }}">
         <div class="row g-3">
           <div class="col-md-4">
-            <label class="form-label">Fecha Inicio:</label>
+            <label class="form-label">{{ t['start_date'] }}:</label>
             <input type="date" name="start_date" class="form-control" required>
           </div>
           <div class="col-md-4">
-            <label class="form-label">Fecha Fin:</label>
+            <label class="form-label">{{ t['end_date'] }}:</label>
             <input type="date" name="end_date" class="form-control" required>
           </div>
           <div class="col-md-4 d-flex align-items-end">
-            <button type="submit" class="btn btn-primary w-100">Generar Informe</button>
+            <button type="submit" class="btn btn-primary w-100">{{ t['generate_report'] }}</button>
           </div>
         </div>
       </form>
@@ -78,39 +78,39 @@
     {% if chart_data %}
     <div class="report-section mt-4">
       <div class="d-flex justify-content-between mb-2">
-        <button id="prevBtn" class="btn btn-outline-primary btn-sm">&larr; Día anterior</button>    <!--Botones paginación-->
-        <button id="nextBtn" class="btn btn-outline-primary btn-sm">Día siguiente &rarr;</button>
+        <button id="prevBtn" class="btn btn-outline-primary btn-sm">&larr; {{ t['previous_day'] }}</button>    <!--Botones paginación-->
+        <button id="nextBtn" class="btn btn-outline-primary btn-sm">{{ t['next_day'] }} &rarr;</button>
       </div>
-      <h4 class="mb-3">Gráfico de Vehículos por Día</h4>
+      <h4 class="mb-3">{{ t['graph_by_day'] }}</h4>
       <canvas id="barChart" height="100"></canvas>
     </div>
     {% endif %}
 
     {% if report_data %}
     <div class="report-section mt-4">
-      <h4 class="mb-3">Resumen del periodo ({{ start_date }} al {{ end_date }})</h4>
+      <h4 class="mb-3">{{ t['period_summary'].format(start_date, end_date) }}</h4>
       <div class="row text-center align-items-stretch">
         
         <!-- Columna 1: KPIs generales en 2x2 -->
         <div class="col-md-4">
           <div class="card p-3 text-center kpi-card d-flex flex-column">
-            <h6 class="mb-3">Resumen general</h6>
+            <h6 class="mb-3">{{ t['general_summary'] }}</h6>
             <div class="kpi-content">
               <div class="row">
                 <div class="col-6 mb-3">
-                  <strong>Total</strong><br>
+                  <strong>{{ t['total'] }}</strong><br>
                   {{ report_data.total }}
                 </div>
                 <div class="col-6 mb-3">
-                  <strong>Promedio/día</strong><br>
+                  <strong>{{ t['average_per_day'] }}</strong><br>
                   {{ report_data.avg_per_day }}
                 </div>
                 <div class="col-6">
-                  <strong>Día más tráfico</strong><br>
+                  <strong>{{ t['busiest_day'] }}</strong><br>
                   {{ report_data.busiest_day }}
                 </div>
                 <div class="col-6">
-                  <strong>Día menos tráfico</strong><br>
+                  <strong>{{ t['quietest_day'] }}</strong><br>
                   {{ report_data.quietest_day }}
                 </div>
               </div>
@@ -121,7 +121,7 @@
      <!-- Columna 2: Porcentaje por tipo -->
         <div class="col-md-4">
           <div class="card p-3 text-center kpi-card d-flex flex-column">
-            <h6 class="mb-3">Porcentajes por tipo</h6>
+            <h6 class="mb-3">{{ t['percentages_by_type'] }}</h6>
             <div class="kpi-content">
               <div class="row row-cols-2 g-2">
                 {% for veh in report_data.vehicle_percentages %}
@@ -149,23 +149,23 @@
         <!-- Columna 3: KPIs técnicos -->
         <div class="col-md-4">
           <div class="card p-3 text-center kpi-card d-flex flex-column">
-            <h6 class="mb-3">Estadísticas técnicas</h6>
+            <h6 class="mb-3">{{ t['technical_stats'] }}</h6>
             <div class="kpi-content">
               <div class="row">
                 <div class="col-6 mb-3">
-                  <strong>Modelo más usado</strong><br>
+                  <strong>{{ t['top_model'] }}</strong><br>
                   {{ report_data.top_model }}
                 </div>
                 <div class="col-6 mb-3">
-                  <strong>Vídeos distintos</strong><br>
+                  <strong>{{ t['video_count'] }}</strong><br>
                   {{ report_data.video_count }}
                 </div>
                 <div class="col-6">
-                  <strong>Facultad más activa</strong><br>
+                  <strong>{{ t['top_faculty'] }}</strong><br>
                   {{ report_data.top_faculty }}
                 </div>
                 <div class="col-6">
-                  <strong>Facultad menos activa</strong><br>
+                  <strong>{{ t['low_faculty'] }}</strong><br>
                   {{ report_data.low_faculty }}
                 </div>
               </div>
@@ -181,18 +181,18 @@
     <!-- Tabla -->
     {% if report_data.facultades %}
     <div class="report-section mt-4">
-      <h4 class="mb-3">Resumen por Facultad</h4>
+      <h4 class="mb-3">{{ t['faculty_summary'] }}</h4>
 
       <table id="tablaFacultades" class="table table-striped table-bordered text-center align-middle">
         <thead class="table-light">
           <tr>
-            <th>Facultad</th>
-            <th>Total</th>
-            <th><img src="{{ url_for('static', filename='icons/coche.png') }}" alt="Coche" width="20"> Coche</th>
-            <th><img src="{{ url_for('static', filename='icons/moto.png') }}" alt="Moto" width="20"> Moto</th>
-            <th><img src="{{ url_for('static', filename='icons/furgoneta.png') }}" alt="Furgoneta" width="20"> Furgoneta</th>
-            <th><img src="{{ url_for('static', filename='icons/camion.png') }}" alt="Camión" width="20"> Camión</th>
-            <th>Vídeos</th>
+            <th>{{ t['faculty'] }}</th>
+            <th>{{ t['total'] }}</th>
+            <th><img src="{{ url_for('static', filename='icons/coche.png') }}" alt="{{ t['coche'] }}" width="20"> {{ t['coche'] }}</th>
+            <th><img src="{{ url_for('static', filename='icons/moto.png') }}" alt="{{ t['moto'] }}" width="20"> {{ t['moto'] }}</th>
+            <th><img src="{{ url_for('static', filename='icons/furgoneta.png') }}" alt="{{ t['furgoneta'] }}" width="20"> {{ t['furgoneta'] }}</th>
+            <th><img src="{{ url_for('static', filename='icons/camion.png') }}" alt="{{ t['camion'] }}" width="20"> {{ t['camion'] }}</th>
+            <th>{{ t['videos'] }}</th>
           </tr>
         </thead>
         <tbody>
@@ -213,7 +213,7 @@
       <div class="text-end mt-3">
         <a href="{{ url_for('export_csv', start_date=start_date, end_date=end_date) }}" 
           class="btn btn-success">
-          <i class="bi bi-file-earmark-excel"></i> Exportar CSV
+          <i class="bi bi-file-earmark-excel"></i> {{ t['export_csv'] }}
         </a>
       </div>
     </div>
@@ -269,7 +269,7 @@
             legend: { position: 'top' },
             title: {
               display: true,
-              text: 'Cantidad de Vehículos por Día y Tipo'
+              text: "{{ t['chart_title'] }}"
             }
           },
           scales: {
@@ -302,7 +302,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <footer class="text-center mt-5 mb-2">
     <small style="font-size: 0.65rem; color: #adb5bd;">
-      Iconos por <a href="https://www.flaticon.es" target="_blank" style="color: #adb5bd; text-decoration: none;">Flaticon</a>
+       {{ t['icons_by'].format('<a href="https://www.flaticon.es" target="_blank">Flaticon</a>')|safe }}
     </small>
   </footer>
 
@@ -318,7 +318,7 @@
       ordering: true,       // ordenar por columnas
       order: [[1, 'desc']],
       language: {
-        url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+         url: `//cdn.datatables.net/plug-ins/1.13.4/i18n/${ session.lang === 'en' ? 'en-GB' : 'es-ES' }.json`
       }
     });
   });

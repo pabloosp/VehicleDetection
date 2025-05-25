@@ -46,7 +46,7 @@ def check_valid_session():
     if 'username' in session:
         if session.get('startup_token') != app.config['STARTUP_TOKEN']:
             session.clear()
-            flash('La sesión expiró. Inicia sesión nuevamente.', 'warning')
+            flash(g.t['session_expired'], 'warning')
             return redirect(url_for('login'))
 
 @app.before_request
@@ -295,7 +295,7 @@ def user_dashboard():
             }
 
         except Exception as e:
-            flash(f'Error al generar reporte: {str(e)}', 'danger')
+            flash(f"{g.t['error_generate_report']}: {str(e)}", 'danger')
         
     return render_template(
         'user_dashboard.html',
@@ -456,7 +456,7 @@ def export_csv(start_date, end_date):
         writer = csv.writer(output)
         
         # Cabeceras
-        writer.writerow(['Fecha y Hora', 'Tipo de Vehículo', 'Modelo YOLO', 'Facultad', 'Dispositivo', 'Nombre de archivo'])
+        writer.writerow([g.t['csv_header_datetime'],g.t['csv_header_type'],g.t['csv_header_model'],g.t['csv_header_faculty'],g.t['csv_header_device'],g.t['csv_header_filename']])
         
         # Datos
         for record in records:
@@ -472,14 +472,14 @@ def export_csv(start_date, end_date):
         # Crear respuesta
         from flask import make_response
         response = make_response(output.getvalue())
-        filename = f"reporte_{start_date}_a_{end_date}.csv"
+        filename = g.t['report_filename'].format(start_date, end_date)
         response.headers['Content-Disposition'] = f'attachment; filename={filename}'
         response.headers['Content-type'] = 'text/csv'
         
         return response
         
     except Exception as e:
-        flash(f'Error al generar CSV: {str(e)}', 'danger')
+        flash(f"{g.t['error_generate_csv']}: {str(e)}", 'danger')
         return redirect(url_for('user_dashboard'))
 
 @app.route('/video_feed')
@@ -521,7 +521,7 @@ def first_frame_image():
     frame_path = session.get('first_frame_path')
     if frame_path and os.path.exists(frame_path):
         return Response(open(frame_path, 'rb').read(), mimetype='image/jpeg')
-    return "Imagen no disponible", 404
+    return g.t['image_not_available'], 404
 
 @app.route('/set_line', methods=['POST'])
 def set_line():
@@ -529,7 +529,7 @@ def set_line():
     
     data = request.get_json()
     if not data:
-        return jsonify({"error": "No se recibió línea"}), 400
+        return jsonify({"error": g.t['error_no_line']}), 400
 
     pt1 = (int(data['x1']), int(data['y1']))
     pt2 = (int(data['x2']), int(data['y2']))
@@ -543,7 +543,7 @@ def set_line():
         original_filename = session.get('original_filename', 'Desconocido')
 
         if not all([tmp_video, model, location]):
-            return jsonify({"error": "Datos de vídeo incompletos"}), 400
+            return jsonify({"error": g.t['error_incomplete_data']}), 400
 
         selected_model = model
         video_source = tmp_video
@@ -588,7 +588,7 @@ def end_video():
         global_processor.reset_counter()
     session['video_ready'] = False
     session.pop('selected_faculty', None)
-    flash("Procesamiento finalizado. Puedes subir un nuevo video.", "info")
+    flash(g.t['processing_finished'], "info")
     return redirect(url_for('expert_dashboard'))
 
 @app.route('/set_lang/<lang>')
