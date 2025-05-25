@@ -108,10 +108,10 @@ class YOLOProcessor:
                         self.crossed_ids.add(track_id)
                         self.vehicle_count += 1
                         tipo_map = {
-                            2: self.t['coche'],
-                            3: self.t['moto'],
-                            5: self.t['furgoneta'],
-                            7: self.t['camion']
+                            2: "Coche", 
+                            3: "Moto",
+                            5: "Furgoneta",
+                            7: "Camión"
                         }
                         vehicle_type = tipo_map.get(class_idx, f"Clase {class_idx}")
                         self.save_vehicle_log(vehicle_type)

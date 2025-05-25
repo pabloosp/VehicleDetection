@@ -42,6 +42,11 @@ selected_model = None
 global_processor = YOLOProcessor(model_path='yolo11s.pt')
 
 @app.before_request
+def set_language():
+    lang = session.get('lang', 'es')  # Idioma por defecto
+    g.t = translations.get(lang, translations['es'])
+
+@app.before_request
 def check_valid_session():
     if 'username' in session:
         if session.get('startup_token') != app.config['STARTUP_TOKEN']:
@@ -49,10 +54,7 @@ def check_valid_session():
             flash(g.t['session_expired'], 'warning')
             return redirect(url_for('login'))
 
-@app.before_request
-def set_language():
-    lang = session.get('lang', 'es')  # Idioma por defecto
-    g.t = translations.get(lang, translations['es'])
+
 
 @app.route('/')
 def index():
@@ -85,17 +87,16 @@ def login():
 @app.route('/logout')
 def logout():
     global video_source, global_processor, selected_model
-    for key in [
-        'tmp_video_path', 'pending_model', 'pending_use_cuda',
-        'pending_location', 'first_frame_path', 'selected_faculty',
-        'gps_coords', 'video_ready'
-    ]:
-        session.pop(key, None)
-    # Limpiar referencias globales
-    video_source = None
-    global_processor = None
-    selected_model = None
+    # Guardamos el idioma actual antes de limpiar la sesión
+    current_lang = session.get('lang')
+    
+    # Limpiamos el resto de la sesión
     session.clear()
+    
+    # Restauramos el idioma
+    if current_lang:
+        session['lang'] = current_lang
+    
     flash(g.t['session_closed'], 'info')
     return redirect(url_for('login'))
 

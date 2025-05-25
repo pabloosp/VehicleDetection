@@ -314,12 +314,19 @@
 <script>
   $(document).ready(function() {
     $('#tablaFacultades').DataTable({
-      paging: false,        // sin paginación
-      ordering: true,       // ordenar por columnas
+      paging: false,
+      ordering: true,
       order: [[1, 'desc']],
       language: {
-         url: `//cdn.datatables.net/plug-ins/1.13.4/i18n/${ session.lang === 'en' ? 'en-GB' : 'es-ES' }.json`
-      }
+        url: "//cdn.datatables.net/plug-ins/1.13.4/i18n/{% if session.get('lang', 'es') == 'en' %}en-GB{% else %}es-ES{% endif %}.json"
+      },
+      // Para asegurar que la ordenación numérica funcione en columnas con porcentajes
+      columnDefs: [
+        { 
+          type: 'num', 
+          targets: [1,2,3,4,5] // Índices de columnas numéricas (total, coche, moto, etc.)
+        }
+      ]
     });
   });
 </script>
