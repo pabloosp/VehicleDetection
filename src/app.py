@@ -321,14 +321,14 @@ def expert_dashboard():
     if request.method == 'POST':
         
         if session.get('video_ready'):
-            flash("Finaliza el procesamiento actual antes de subir un nuevo video.", "warning")
+            flash(g.t['must_finish_first'], "warning")
             return redirect(url_for('expert_dashboard'))
         
         #Form de selección de facultad
         if 'facultad' in request.form:
             selected_faculty = request.form['facultad']
             session['selected_faculty'] = selected_faculty
-            flash(f"Facultad asignada: {selected_faculty}", "success")
+            flash(f"{g.t['assigned_faculty']}: {selected_faculty}", "success")
             
             session['pending_location'] = selected_faculty
 
@@ -341,7 +341,7 @@ def expert_dashboard():
             use_cuda = request.form.get('use_cuda') == 'on' and torch.cuda.is_available()
         
             if not model:
-                flash("Debes seleccionar un modelo YOLO", "danger")
+                flash(g.t['must_select_model'], "danger")
                 return redirect(url_for('expert_dashboard'))
             
             if video_source and os.path.exists(video_source):
@@ -369,7 +369,7 @@ def expert_dashboard():
                     cv2.imwrite(frame_path, frame)
                     session['first_frame_path'] = frame_path
                 else:
-                    flash("No se pudo obtener el primer frame del vídeo", "danger")
+                    flash(g.t['no_first_frame'], "danger")
                     return redirect(url_for('expert_dashboard'))
             
             
@@ -388,12 +388,12 @@ def expert_dashboard():
                         location = facultad_detectada
                         session['gps_coords'] = location
                         session['selected_faculty'] = location 
-                        flash(f"Facultad detectada automáticamente: {facultad_detectada}", "success")
+                        flash(f"{g.t['auto_faculty']}: {facultad_detectada}", "success")
                     else:
                         location = None      #Mostrar form si tiene metadatos y no pertenecen a ninguna facultad
                         session['gps_coords'] = f"Lat: {lat:.6f}, Lon: {lon:.6f}"
                         show_faculty_form = True  
-                        flash("Coordenadas detectadas, pero fuera de zonas conocidas. Seleccione la facultad manualmente.", "warning")
+                        flash(g.t['manual_faculty_msg'], "warning")
 
                     session['tmp_video_path'] = tmp_file.name
                     session['pending_model'] = model
@@ -401,7 +401,7 @@ def expert_dashboard():
                     session['pending_location'] = location
                 else:
                     gps_status = "warning"
-                    flash("Coordenadas no detectadas. Por favor seleccione la facultad manualmente", "warning")
+                    flash(g.t['no_coords'], "warning")
                     show_faculty_form = True
                     session['tmp_video_path'] = tmp_file.name
                     session['pending_model'] = model
@@ -409,16 +409,16 @@ def expert_dashboard():
                 
                 device_status = "GPU" if use_cuda else "CPU"
                 flash(
-                    f"Video {file_ext} cargado | Modelo: {os.path.basename(model)} | "
-                    f"Dispositivo: {device_status}",
+                    f"{g.t['video_loaded']} {file_ext} | {g.t['model_selected']}: {os.path.basename(model)} | "
+                    f"{g.t['device']}: {device_status}",
                     "success"
                 )
                 
             except Exception as e:
-                    flash(f"Error al inicializar el modelo: {str(e)}", "danger")
+                    flash(f"{g.t['error_init_model']}: {str(e)}", "danger")
         
         elif 'facultad' not in request.form:
-            flash("No se ha seleccionado ningún archivo de video", "danger")
+            flash(g.t['no_video_selected'], "danger")
             return redirect(url_for('expert_dashboard'))
         
         if session.get('video_ready'):
