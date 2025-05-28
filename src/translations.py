@@ -89,6 +89,9 @@ translations = {
       'user': "Usuario",
       'expert': "Experto",
       'back_to_login': "Volver al login",
+      'registration_success': "Usuario registrado. Inicia sesión.",
+      'user_exists':          "Ese usuario ya existe.",
+      'registration_error':   "Error al registrar el usuario",
     },
     'en': {
       'vehicle_detection': "Vehicle Detection",
@@ -180,5 +183,8 @@ translations = {
       'user': "User",
       'expert': "Expert",
       'back_to_login': "Back to login",
+      'registration_success': "User registered. Please log in.",
+      'user_exists':          "Username already taken.",
+      'registration_error':   "Error registering user",
       }
 }

@@ -15,6 +15,7 @@ import datetime
 from facultades import facultad_por_coordenadas
 from flask import g
 from translations import translations
+from mysql.connector.errors import IntegrityError
 ALLOWED_EXTENSIONS = {'.mov', '.mp4', '.avi'}
 
 try:
@@ -598,6 +599,44 @@ def set_lang(lang):
     if lang in translations:
         session['lang'] = lang
     return redirect(request.referrer or url_for('index'))
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if 'username' in session:
+        return redirect(url_for(
+            'expert_dashboard' if session.get('role') == 'expert' else 'user_dashboard'
+        ))
+
+    if request.method == 'POST':
+        username = request.form['username'].strip()
+        password = request.form['password']
+        role     = request.form['role']          # 'user' o 'expert'
+
+        if not username or not password:
+            flash(g.t['invalid_credentials'], 'danger')
+            return redirect(url_for('register'))
+
+        try:
+            conn   = get_connection()
+            cursor = conn.cursor()
+            cursor.execute(
+                "INSERT INTO users (username, password, role) VALUES (%s, %s, %s)",
+                (username, password, role)       # ← contraseña en texto plano
+            )
+            conn.commit()
+            flash(g.t['registration_success'], 'success')
+            return redirect(url_for('login'))
+
+        except IntegrityError:                   # usuario duplicado
+            flash(g.t['user_exists'], 'warning')
+        except Exception as e:
+            flash(f"{g.t['registration_error']}: {e}", 'danger')
+        finally:
+            cursor.close()
+            conn.close()
+
+    return render_template('register.html', t=g.t)
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
