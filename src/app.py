@@ -15,7 +15,7 @@ import datetime
 from facultades import facultad_por_coordenadas
 from flask import g
 from translations import translations
-from mysql.connector.errors import IntegrityError
+from mysql.connector.errors import IntegrityError, Error
 ALLOWED_EXTENSIONS = {'.mov', '.mp4', '.avi'}
 
 try:
@@ -67,23 +67,37 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        
-        if username == 'expert' and password == 'expert':
-            session['username'] = username
-            session['role'] = 'expert'
-            session['startup_token'] = app.config['STARTUP_TOKEN']
-            return redirect(url_for('expert_dashboard'))
-        
-        elif username == 'user' and password == 'user':  # Nuevo usuario básico
-            session['username'] = username
-            session['role'] = 'user'
-            session['startup_token'] = app.config['STARTUP_TOKEN']
-            return redirect(url_for('user_dashboard'))  # Nueva ruta
-        
-        else:
+        username = request.form['username'].strip()
+        password = request.form['password']
+
+        try:
+            conn   = get_connection()
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute(
+                "SELECT username, password, role FROM users WHERE username = %s",
+                (username,)
+            )
+            user = cursor.fetchone()
+            cursor.close()
+            conn.close()
+
+            # Validación
+            if user and user['password'] == password:
+                session['username']      = user['username']
+                session['role']          = user['role']
+                session['startup_token'] = app.config['STARTUP_TOKEN']
+
+                return redirect(
+                    url_for('expert_dashboard')
+                    if user['role'] == 'expert'
+                    else url_for('user_dashboard')
+                )
+
             flash(g.t['invalid_credentials'], 'danger')
+
+        except Error as e:
+            flash(f"DB error: {e}", 'danger')
+
     return render_template('login.html', t=g.t)
 
 @app.route('/logout')
