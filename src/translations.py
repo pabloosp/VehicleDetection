@@ -83,6 +83,12 @@ translations = {
       'error_no_line': "No se recibió línea",
       'error_incomplete_data': "Datos de video incompletos",
       'choose_model': "Seleccionar modelo",
+      'register': "Registro",
+      'register_action': "Registrarse",
+      'role': "Rol",
+      'user': "Usuario",
+      'expert': "Experto",
+      'back_to_login': "Volver al login",
     },
     'en': {
       'vehicle_detection': "Vehicle Detection",
@@ -168,6 +174,11 @@ translations = {
       'error_no_line': "No line received",
       'error_incomplete_data': "Incomplete video data",
       'choose_model': "Choose model",
-
+      'register': "Register",
+      'register_action': "Sign up",
+      'role': "Role",
+      'user': "User",
+      'expert': "Expert",
+      'back_to_login': "Back to login",
       }
 }
