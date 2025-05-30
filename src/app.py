@@ -16,6 +16,7 @@ from facultades import facultad_por_coordenadas
 from flask import g
 from translations import translations
 from mysql.connector.errors import IntegrityError, Error
+from werkzeug.security import generate_password_hash, check_password_hash
 ALLOWED_EXTENSIONS = {'.mov', '.mp4', '.avi'}
 
 try:
@@ -82,7 +83,7 @@ def login():
             conn.close()
 
             # Validación
-            if user and user['password'] == password:
+            if user and check_password_hash(user['password'], password):
                 session['username']      = user['username']
                 session['role']          = user['role']
                 session['startup_token'] = app.config['STARTUP_TOKEN']
@@ -629,13 +630,15 @@ def register():
         if not username or not password:
             flash(g.t['invalid_credentials'], 'danger')
             return redirect(url_for('register'))
+        
+        hashed_pw = generate_password_hash(password)
 
         try:
             conn   = get_connection()
             cursor = conn.cursor()
             cursor.execute(
                 "INSERT INTO users (username, password, role) VALUES (%s, %s, %s)",
-                (username, password, role)       # ← contraseña en texto plano
+                (username, hashed_pw, role)       # ← contraseña en texto plano
             )
             conn.commit()
             flash(g.t['registration_success'], 'success')
