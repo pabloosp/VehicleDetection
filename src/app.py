@@ -19,6 +19,10 @@ from mysql.connector.errors import IntegrityError, Error
 from werkzeug.security import generate_password_hash, check_password_hash
 ALLOWED_EXTENSIONS = {'.mov', '.mp4', '.avi'}
 
+from dotenv import load_dotenv
+load_dotenv()        
+print("✅  python-dotenv está disponible y load_dotenv() no ha fallado.")
+
 try:
     conn = get_connection()
     print("✅ Conexión a MySQL establecida.")
