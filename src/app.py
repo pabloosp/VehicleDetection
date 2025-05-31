@@ -38,7 +38,7 @@ create_users_table()
 
 
 app = Flask(__name__)
-app.secret_key = 'mi_clave_secreta'
+app.secret_key = os.environ['FLASK_SECRET']
 app.config['STARTUP_TOKEN'] = str(time.time())
 
 # De momento se almacenan los vídeos en archivos temp
