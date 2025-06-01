@@ -42,9 +42,9 @@ def get_gps_from_video(file_path):
         print(f"⚠️ Error: {str(e)}")
         return None
 
-# Uso
-coords = get_gps_from_video("test3.mp4")
-if coords:
-    print(f"✅ Coordenadas encontradas: Lat={coords['lat']}, Lon={coords['lon']}")
-else:
-    print("❌ No se encontraron metadatos GPS.")
+# Descomentar para probar la extracción de coordenadas con vídeos.
+#coords = get_gps_from_video("../vids/UBU_Metadata_highres.mov")
+#if coords:
+    #print(f"✅ Coordenadas encontradas: Lat={coords['lat']}, Lon={coords['lon']}")
+#else:
+    #print("❌ No se encontraron metadatos GPS.")
