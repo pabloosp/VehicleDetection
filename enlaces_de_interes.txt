@@ -1,0 +1,7 @@
+Repositorio GitHub -> https://github.com/pabloosp/VehicleDetection
+
+Proyecto Zube -> https://zube.io/pabloosp/vehicledetection/w/workspace-1/analytics
+
+Vídeo demostración -> https://youtu.be/XQJE43D6FPM
+
+Proyecto SonarCloud -> https://sonarcloud.io/project/overview?id=pabloosp_VehicleDetection
