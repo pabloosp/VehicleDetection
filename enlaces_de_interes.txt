@@ -6,4 +6,4 @@ Vídeo demostración -> https://youtu.be/XQJE43D6FPM
 
 Proyecto SonarCloud -> https://sonarcloud.io/project/overview?id=pabloosp_VehicleDetection
 
-MáquinaVirtual OneDrive -> https://universidaddeburgos-my.sharepoint.com/:f:/r/personal/psp1003_alu_ubu_es/Documents/MV-TFG_PabloSainz?csf=1&web=1&e=56yhrM
+MáquinaVirtual OneDrive -> https://universidaddeburgos-my.sharepoint.com/:f:/r/personal/psp1003_alu_ubu_es/Documents/MV-TFG_PabloSainz?csf=1&web=1&e=aEHuSq
